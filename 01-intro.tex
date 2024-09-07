@@ -7,6 +7,29 @@
 \usepackage{graphicx} % For including images
 \usepackage{amsmath}  % For math symbols and formulas
 \usepackage{hyperref} % For hyperlinks
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[T1]{fontenc}
+
+\lstdefinestyle{CStyle}{
+  language=C,                    % Set the language to C
+  basicstyle=\ttfamily\footnotesize\linespread{0.9}\tiny, % Set font style and size
+  keywordstyle=\color{blue},      % Color of keywords
+  commentstyle=\color{gray},      % Color of comments
+  stringstyle=\color{red},        % Color of strings
+  showstringspaces=false,         % Do not mark spaces in strings
+  breaklines=true,                % Enable line breaks at appropriate places
+  breakatwhitespace=false,        % Break lines at any character, not just whitespace
+  numbers=left,                   % Show line numbers on the left
+  numberstyle=\tiny\color{gray},  % Style for line numbers
+  tabsize=4,                      % Set tab width
+  keepspaces=true,                % Keep indentation spaces
+  frame=single,                   % Add a border around the code
+  aboveskip=0pt,                  % Reduce space above the code block
+  belowskip=0pt,                   % Reduce space below the code block
+  xleftmargin=7.5pt,                      % Add left padding (approx. 2.8mm or 10px)
+  xrightmargin=15pt,                      % Add left padding (approx. 2.8mm or 10px)
+}
 
 % Title, author, date, and institute (optional)
 \title[Parallel Programming. Introduction]{Parallel Programming course. Introduction}
@@ -44,11 +67,64 @@
 \end{frame}
 
 % Section
-\section{Introduction}
+\section{Introduction to MPI}
 
-% Slide 1
-\begin{frame}{Slide}
+% "Hello, World" in MPI
+\begin{frame}[fragile]{"Hello, World" in MPI}
+
+  \lstset{style=CStyle, caption=Basic application written using MPI}
+  \begin{lstlisting}
+#include <mpi.h>
+
+#include <iostream>
+
+int main(int argc, char** argv) {
+  MPI_Init(&argc, &argv);
+
+  int world_size;
+  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+
+  int world_rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+
+  char processor_name[MPI_MAX_PROCESSOR_NAME];
+  int len_chars;
+  MPI_Get_processor_name(processor_name, &len_chars);
+
+  MPI_Barrier(MPI_COMM_WORLD);
+  std::cout << "Processor = " << processor_name << std::endl;
+  std::cout << "Rank = " << world_rank << std::endl;
+  std::cout << "Number of processors = " << world_size << std::endl;
+
+  MPI_Finalize();
+  return 0;
+}
+  \end{lstlisting}
+
 \end{frame}
+
+\begin{frame}[fragile]{Performance measurement in MPI: \texttt{MPI\_Wtime()}}
+  \texttt{double MPI\_Wtime(void)}
+
+  \begin{itemize}
+    \item \texttt{MPI\_Wtime()} is a function provided by the MPI standard to measure the wall-clock time (in seconds) since some arbitrary point in the past.
+    \item This function is often used for performance analysis in parallel programs to measure the execution time of sections of code.
+    \item It returns a double precision floating-point number representing the current time. The returned time is in seconds.
+    \item \texttt{MPI\_Wtime()} is local to the process and does not guarantee synchronization between processes, meaning each process may have a different starting time reference.
+  \end{itemize}
+
+  Usage example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+double start = MPI_Wtime();
+// Code to time
+double end = MPI_Wtime();
+double elapsed = end - start;
+  \end{lstlisting}
+
+  Documentation reference: \texttt{\href{https://www.mpich.org/static/docs/v3.2/www3/MPI_Wtime.html}{https://www.mpich.org/static/docs/v3.2/www3/MPI\_Wtime.html}}
+\end{frame}
+
 
 % Thank You Slide
 \begin{frame}
