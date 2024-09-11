@@ -25,6 +25,7 @@
 *.synctex.gz
 *.run.xml
 *.bcf
+*.vrb
 
 # Editors and IDEs
 # VSCode
