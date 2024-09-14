@@ -69,6 +69,35 @@
 % Section
 \section{Introduction to MPI}
 
+\begin{frame}[fragile]{What is MPI?}
+  MPI (Message Passing Interface) is a standardized and portable message-passing system, designed to function on a variety of parallel computing architectures.
+
+  Primarily used in high-performance computing (HPC) to allow different processes to communicate with each other in a distributed memory environment.
+\end{frame}
+
+\begin{frame}[fragile]{MPI: library vs standard}
+  \begin{table}[h!]
+    \begin{tabular}{| p{2.1cm} | p{4.2 cm} | p{4.2 cm} |}
+      \hline
+      \textbf{Aspect} & \textbf{MPI Standard} & \textbf{MPI Library} \\
+      \hline
+      \textbf{Definition} & A formal set of specifications & A concrete software implementation \\
+      \hline
+      \textbf{Purpose} & Defines the behavior of message-passing systems & Provides a runnable implementation of the standard \\
+      \hline
+      \textbf{Portability} & Platform-agnostic guidelines & Implementations may be platform-specific \\
+      \hline
+      \textbf{Performance} & No direct impact on performance & Optimized for different platforms and hardware \\
+      \hline
+      \textbf{Examples} & MPI-1, MPI-2, MPI-3, MPI-4 (specifications) & MPICH, Open MPI, Intel MPI \\
+      \hline
+    \end{tabular}
+    \caption{Key Differences Between MPI Standard and MPI Library}
+  \end{table}
+\end{frame}
+
+\section{"Hello, World" in MPI}
+
 % "Hello, World" in MPI
 \begin{frame}[fragile]{"Hello, World" in MPI}
 
@@ -101,6 +130,120 @@ int main(int argc, char** argv) {
 }
   \end{lstlisting}
 
+\end{frame}
+
+\begin{frame}[fragile]{Compiling MPI application}
+  Linux: \\
+  \texttt{mpicc -o hello\_mpi hello\_mpi.c}
+
+  Windows: \\
+  \texttt{cl /I"C:}\texttt{\textbackslash}\texttt{Program Files (x86)}\texttt{\textbackslash}\texttt{Microsoft SDKs}\texttt{\textbackslash}\texttt{MPI}\texttt{\textbackslash}\texttt{Include" hello\_mpi.c /link /LIBPATH:"C:}\texttt{\textbackslash}\texttt{Program Files (x86)}\texttt{\textbackslash}\texttt{Microsoft SDKs}\texttt{\textbackslash}\texttt{MPI}\texttt{\textbackslash}\texttt{Lib}\texttt{\textbackslash}\texttt{x64" msmpi.lib}
+
+\end{frame}
+
+\begin{frame}[fragile]{Running MPI application}
+  Important! If you run application directly (\texttt{./hello\_mpi}) you will not get expected result!
+
+  Linux: \\
+  \texttt{mpiexec -n 4 ./hello\_mpi}
+
+  Windows: \\
+  \texttt{mpirun -n 4 hello\_mpi.exe}
+\end{frame}
+
+\section{Brief API calls overview}
+
+\begin{frame}[fragile]{MPI initialization: \texttt{MPI\_Init()}}
+  \texttt{int MPI\_Init(int *argc, char ***argv)}
+
+  It initializes the MPI environment and must be called before any other MPI function.
+
+  \lstset{style=CStyle, caption=Basic application written using MPI}
+  \begin{lstlisting}
+#include <mpi.h>
+#include <stdio.h>
+
+int main(int argc, char** argv) {
+    // Initialize the MPI environment
+    MPI_Init(&argc, &argv);
+
+    ...
+
+    return 0;
+}
+  \end{lstlisting}
+
+\end{frame}
+
+\section{MPI data distribution}
+
+\begin{frame}[fragile]{MPI data distribution example}
+  \lstset{style=CStyle, caption=MPI data distribution example}
+  \begin{lstlisting}
+    #include <mpi.h>
+    #include <stdio.h>
+    int main(int argc, char** argv) {
+        // Initialize the MPI environment
+        MPI_Init(&argc, &argv);
+    
+        // Get the number of processes
+        int world_size;
+        MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+    
+        // Get the rank of the process
+        int world_rank;
+        MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    
+        // Define message
+        int number;
+        if (world_rank == 0) {
+            // If we are rank 0, set number to -1 and send it to process 1
+            number = -1;
+            MPI_Send(&number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+            printf("Process 0 sent number %d to process 1\n", number);
+        } else if (world_rank == 1) {
+            // If we are rank 1, receive the number from process 0
+            MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            printf("Process 1 received number %d from process 0\n", number);
+        }
+    
+        // Finalize the MPI environment
+        MPI_Finalize();
+        return 0;
+    }
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{MPI\_Send()}}
+  \texttt{int MPI\_Send(const void *buf, int count, MPI\_Datatype datatype, int dest, int tag, MPI\_Comm comm)}
+
+  Parameters:
+
+  \begin{itemize}
+    \item buf: The starting address of the data buffer to be sent.
+    \item count: The number of elements in the buffer.
+    \item datatype: The type of data being sent (e.g., \texttt{MPI\_INT}, \texttt{MPI\_FLOAT}).
+    \item dest: The rank (ID) of the destination process.
+    \item tag: A user-defined message identifier to differentiate messages.
+    \item comm: The communicator that defines the group of processes within which the message is being sent (e.g., \texttt{MPI\_COMM\_WORLD}).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{MPI\_Recv()}}
+  \texttt{int MPI\_Recv(void *buf, int count, MPI\_Datatype datatype, int source, int tag, MPI\_Comm comm, MPI\_Status *status)}
+
+  Parameters:
+
+  \begin{itemize}
+    \item buf: The starting address of the buffer where the received data will be stored.
+    \item count: The maximum number of elements that the buffer can hold.
+    \item datatype: The type of data being received (e.g., \texttt{MPI\_INT}, \texttt{MPI\_FLOAT}).
+    \item source: The rank of the sending process. Use \texttt{MPI\_ANY\_SOURCE} to receive from any process.
+    \item tag: The message identifier (tag). Use \texttt{MPI\_ANY\_TAG} to receive any message regardless of the tag.
+    \item comm: The communicator for the group of processes within which the message is being received (e.g., \texttt{MPI\_COMM\_WORLD}).
+    \item status: A structure that contains information about the received message, such as the actual source and tag.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{Performance measurement in MPI: \texttt{MPI\_Wtime()}}
