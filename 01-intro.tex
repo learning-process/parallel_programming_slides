@@ -89,7 +89,7 @@
       \hline
       \textbf{Performance} & No direct impact on performance & Optimized for different platforms and hardware \\
       \hline
-      \textbf{Examples} & MPI-1, MPI-2, MPI-3, MPI-4 (specifications) & MPICH, Open MPI, Intel MPI \\
+      \textbf{Examples} & MPI-1, MPI-2, MPI-3, MPI-4 (specifications) & MPICH, Open MPI, MS MPI (Microsoft MPI), Intel MPI \\
       \hline
     \end{tabular}
     \caption{Key Differences Between MPI Standard and MPI Library}
@@ -228,6 +228,8 @@ int main(int argc, char** argv) {
     \item tag: A user-defined message identifier to differentiate messages.
     \item comm: The communicator that defines the group of processes within which the message is being sent (e.g., \texttt{MPI\_COMM\_WORLD}).
   \end{itemize}
+
+  const void *buf, int count, MPI\_Datatype datatype - data array description
 \end{frame}
 
 \begin{frame}[fragile]{\texttt{MPI\_Recv()}}
@@ -243,6 +245,23 @@ int main(int argc, char** argv) {
     \item tag: The message identifier (tag). Use \texttt{MPI\_ANY\_TAG} to receive any message regardless of the tag.
     \item comm: The communicator for the group of processes within which the message is being received (e.g., \texttt{MPI\_COMM\_WORLD}).
     \item status: A structure that contains information about the received message, such as the actual source and tag.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{MPI Communicators}
+  MPI Communicator: A communicator in MPI defines a communication context, a group of processes that can send and receive messages from one another. The processes within a communicator are assigned unique ranks, which are integers that identify each process.
+
+  Ranks: Every process within a communicator has a rank, starting from 0. The rank helps to uniquely identify a process within the communicator.
+
+  Groups: A communicator has an associated group of processes. A group is an ordered set of processes, which MPI uses to determine communication partners.
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{MPI\_COMM\_WORLD}}
+  \texttt{MPI\_COMM\_WORLD}: The \texttt{MPI\_COMM\_WORLD} is the default communicator created when an MPI program starts. It includes all the processes that are initiated by the MPI runtime.
+  \begin{itemize}
+    \item Every process in the MPI application automatically becomes a part of \texttt{MPI\_COMM\_WORLD}, and this communicator is used for most communication operations in simple MPI programs.
+    \item All the processes in the program are assigned a rank in \texttt{MPI\_COMM\_WORLD}, starting from 0 to the number of processes minus one.
+    \item \texttt{MPI\_COMM\_WORLD} allows processes to exchange messages, perform collective operations (e.g. broadcasting, reducing, scattering, etc.), and more.
   \end{itemize}
 \end{frame}
 
@@ -275,8 +294,14 @@ double elapsed = end - start;
     \Huge{Thank You!}
 \end{frame}
 
-% Optional references slide
+% References slide
 \begin{frame}{References}
+  \begin{enumerate}
+    \item MPI Standard \href{https://www.mpi-forum.org/docs/}{https://www.mpi-forum.org/docs/}
+    \item MPICH guides: \href{https://www.mpich.org/documentation/guides/}{https://www.mpich.org/documentation/guides/}
+    \item Microsoft MPI: \href{https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi}{https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi}
+    \item OpenMPI docs: \href{https://www.open-mpi.org/doc/}{https://www.open-mpi.org/doc/}
+  \end{enumerate}
 \end{frame}
 
 \end{document}
