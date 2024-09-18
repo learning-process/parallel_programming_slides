@@ -1,0 +1,1 @@
+\beamer@sectionintoc {1}{MPI collective operations}{3}{0}{1}
