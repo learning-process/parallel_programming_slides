@@ -15,7 +15,7 @@ jobs:
         sudo apt-get install texlive*
     - name: Build
       run: |
-        find . -iname '*.tex' -exec pdflatex {} \;
+        find . -iname '*.tex' -exec sh -c 'cd $(echo {}|cut -d"/" -f2) && pdflatex -output-directory $GITHUB_WORKSPACE $GITHUB_WORKSPACE/{}' \;
     - uses: actions/upload-artifact@v4
       with:
         name: pdf-linux
@@ -30,7 +30,7 @@ jobs:
     - name: Build
       run: |
         eval "$(/usr/libexec/path_helper)"
-        find . -iname '*.tex' -exec pdflatex {} \;
+        find . -iname '*.tex' -exec sh -c 'cd $(echo {}|cut -d"/" -f2) && pdflatex -output-directory $GITHUB_WORKSPACE $GITHUB_WORKSPACE/{}' \;
     - uses: actions/upload-artifact@v4
       with:
         name: pdf-macos
