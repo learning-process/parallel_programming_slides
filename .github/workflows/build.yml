@@ -2,6 +2,11 @@ name: Build
 
 on: [push, pull_request]
 
+permissions:
+  id-token: write
+  contents: read
+  pages: write
+
 jobs:
   ubuntu-build:
     runs-on: ubuntu-latest
@@ -35,3 +40,22 @@ jobs:
       with:
         name: pdf-macos
         path: '*.pdf'
+  deploy-to-github-pages:
+    needs: ubuntu-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+    - name: Download PDF artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: pdf-linux
+        path: ./slides
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
