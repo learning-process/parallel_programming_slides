@@ -1,1 +1,3 @@
-\beamer@sectionintoc {1}{MPI collective operations}{3}{0}{1}
+\beamer@sectionintoc {1}{Advanced Send/Receive API}{3}{0}{1}
+\beamer@sectionintoc {2}{Synchronization}{6}{0}{2}
+\beamer@sectionintoc {3}{Collective operations}{8}{0}{3}
