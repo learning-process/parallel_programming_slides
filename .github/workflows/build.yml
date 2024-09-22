@@ -25,6 +25,10 @@ jobs:
       with:
         name: pdf-linux
         path: '*.pdf'
+    - uses: actions/upload-artifact@v4
+      with:
+        name: html
+        path: '*.html'
   macos-build:
     runs-on: macos-latest
     steps:
@@ -52,6 +56,11 @@ jobs:
       with:
         name: pdf-linux
         path: ./slides
+    - name: Download PDF artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: html
+        path: ./
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
