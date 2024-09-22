@@ -64,7 +64,90 @@
     \tableofcontents
 \end{frame}
 
-\section{MPI collective operations}
+\section{Advanced Send/Receive API}
+
+\begin{frame}{Why Using \texttt{MPI\_Send} and \texttt{MPI\_Recv} Is Not Enough?}
+  Blocking Operations \texttt{MPI\_Send} and \texttt{MPI\_Recv} are blocking, causing processes to wait until communication completes.
+  So they are the reason of:
+  \begin{itemize}
+    \item \textbf{Performance Bottlenecks:} Blocking calls can lead to idle CPU time, reducing parallel efficiency.
+    \item \textbf{Lack of Overlap:} Cannot overlap computation with communication, limiting optimization opportunities.
+    \item \textbf{Scalability Issues:} As the number of processes increases, blocking operations can significantly degrade performance.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\texttt{MPI\_Isend}}
+  Non-Blocking Send function. Initiates a send operation that returns immediately.
+
+  \texttt{int MPI\_Isend(const void *buf, int count, MPI\_Datatype datatype, int dest, int tag, MPI\_Comm comm, MPI\_Request *request);}
+
+  Parameters:
+
+  \begin{itemize}
+    \item buf: Initial address of send buffer
+    \item count: Number of elements to send
+    \item datatype: Data type of each send buffer element
+    \item dest: Rank of destination process
+    \item tag: Message tag
+    \item comm: Communicator
+    \item request: Communication request handle
+  \end{itemize}
+  Usage: Allows the sender to proceed with computation while the message is being sent.
+\end{frame}
+
+\begin{frame}{\texttt{MPI\_Irecv}}
+  Non-Blocking Receive function. Initiates a receive operation that returns immediately.
+  \texttt{int MPI\_Irecv(void *buf, int count, MPI\_Datatype datatype, int source, int tag, MPI\_Comm comm, MPI\_Request *request);}
+
+  Parameters:
+
+  \begin{itemize}
+    \item buf: Initial address of receive buffer
+    \item count: Maximum number of elements to receive
+    \item datatype: Data type of each receive buffer element
+    \item source: Rank of source process or \texttt{MPI\_ANY\_SOURCE}
+    \item tag: Message tag or \texttt{MPI\_ANY\_TAG}
+    \item comm: Communicator
+    \item request: Communication request handle
+  \end{itemize}
+  Usage: Allows the receiver to proceed with computation while waiting for the message.
+\end{frame}
+
+\section{Synchronization}
+
+\begin{frame}{What is synchronization in MPI?}
+  Synchronization mechanisms are essential to coordinating processes.
+  Sometimes we need to ensure that particular action has been already completed.
+
+  Synchronization facts:
+
+  \begin{itemize}
+    \item Process Coordination: Mechanism to ensure processes reach a certain point before proceeding
+    \item Data Consistency: Ensures all processes have consistent data before computations
+    \item Types of Synchronization:
+    \begin{itemize}
+      \item Point-to-point synchronization: It involves explicit sending and receiving of messages between two processes using functions like \texttt{MPI\_Send} and \texttt{MPI\_Recv}
+      \item Collective synchronization: Collective operations (see next slides) are used, where all processes must participate
+    \end{itemize}
+    \item Importance: Prevents race conditions and ensures program correctness
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\texttt{MPI\_Barrier}}
+  Global Synchronization function. It blocks processes until all of them have reached the barrier.
+
+  \texttt{int MPI\_Barrier(MPI\_Comm comm);}
+
+  Usage:
+
+  \begin{itemize}
+    \item Ensures all processes have completed preceding computations
+    \item Commonly used before timing code segments for performance measurement
+    \item Typical use case: Synchronize before starting a collective operation
+  \end{itemize}
+\end{frame}
+
+\section{Collective operations}
 
 \begin{frame}{Collective operations}
 \end{frame}
@@ -85,6 +168,9 @@
 \end{frame}
 
 \begin{frame}{Reduction}
+\end{frame}
+
+\begin{frame}{All API have not blocking versions}
 \end{frame}
 
 \begin{frame}
