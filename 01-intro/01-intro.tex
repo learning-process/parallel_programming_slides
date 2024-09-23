@@ -215,6 +215,56 @@ int main(int argc, char** argv) {
 
 \end{frame}
 
+\begin{frame}[fragile]{Problems in multiprocessing environment}
+  There are some typical errors that may occur in multiprocessing environment.
+  Case when there are variables allocated on all processes in quite common.
+  \lstset{style=CStyle, caption=Common variables usage example}
+  \begin{lstlisting}
+    ...
+    int main(int argc, char** argv) {
+        ...
+        // Pay attention to "number" variable
+        int number; // NOTE: in this case data will be created on each process
+        // If you leave this data uninitialized it may lead to an undefined behavior
+        // on specific processes
+        if (world_rank == 0) {
+            // If we are rank 0, "number" variable will be initialized with -1.
+            // OK here
+            number = -1;
+            MPI_Send(&number, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
+            printf("Process 0 sent number %d to process 1\n", number);
+        } else if (world_rank == 1) {
+            // If we are rank 1, receive the number from process 0
+            // OK here
+            MPI_Recv(&number, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            printf("Process 1 received number %d from process 0\n", number);
+        } else {
+          // WARNING: If we are rank 2 and more, there is uninitialized "number" variable!
+          // Potential mistake
+        }
+        ...
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Problems in multiprocessing environment solution?}
+  Example on previous slide may lead to an undefined behavior which is not obvious.
+
+  \begin{itemize}
+    \item In case of number of processes <= 2 there is no issue.
+    \item In case of number of processes > 2 there is potential gap if we use \texttt{number} variable afterwards.
+  \end{itemize}
+
+  How to avoid memory issues?
+  \begin{itemize}
+    \item Do not initialize \texttt{number} variable outside \texttt{if} (create \texttt{number} inside \texttt{if} scope)
+    \item Initialize \texttt{number} variable (e.g. \texttt{int number = 0;})
+  \end{itemize}
+
+  Important! This is the only one simple case of potential error in multiprocessing environment.
+  Pay attention to the safety because debugging in multiprocessing environment is more challenging that in single process environment.
+\end{frame}
+
 \begin{frame}[fragile]{\texttt{MPI\_Send()}}
   \texttt{int MPI\_Send(const void *buf, int count, MPI\_Datatype datatype, int dest, int tag, MPI\_Comm comm)}
 
