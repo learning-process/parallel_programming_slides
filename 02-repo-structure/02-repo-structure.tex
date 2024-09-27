@@ -9,6 +9,7 @@
 \usepackage{hyperref} % For hyperlinks
 \usepackage{listings}
 \usepackage{xcolor}
+\usepackage{tikz}
 \usepackage[T1]{fontenc}
 
 \lstdefinestyle{CStyle}{
@@ -173,6 +174,23 @@
     \caption{Tasks directories}
   \end{table}
 
+\end{frame}
+
+\begin{frame}[fragile]{Directories}
+  \begin{tikzpicture}
+  [scale=.8,auto=left,every node/.style={circle,fill=blue!20}]
+  \node (n1) at (1,10) {PPC};
+  \node (n2) at (3,8)  {tasks};
+  \node (n3) at (5,6)  {mpi};
+  \node (n4) at (9,11)  {src};
+  \node (n5) at (9,9.5) {include};
+  \node (n6) at (9,7) {func\_tests};
+  \node (n7) at (9,4) {perf\_tests};
+
+  \foreach \from/\to in {n1/n2,n2/n3,n3/n4,n3/n5,n3/n6,n3/n7}
+    \draw (\from) -- (\to);
+
+\end{tikzpicture}
 \end{frame}
 
 \begin{frame}{References}
