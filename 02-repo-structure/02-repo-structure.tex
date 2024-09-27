@@ -193,6 +193,169 @@
 \end{tikzpicture}
 \end{frame}
 
+\section{API of the course's repository}
+
+\begin{frame}[fragile]{Task's prototype}
+  \lstset{style=CStyle, caption=include/ops\_seq.hpp}
+  \begin{lstlisting}
+    class TestTaskSequential : public ppc::core::Task {
+     public:
+      explicit TestTaskSequential(std::shared_ptr<ppc::core::TaskData> taskData_) : Task(std::move(taskData_)) {}
+      bool pre_processing() override;
+      bool validation() override;
+      bool run() override;
+      bool post_processing() override;
+    
+     private:
+      int input_{}, res{};
+    };
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Task's source code}
+  \lstset{style=CStyle, caption=src/ops\_seq.cpp | pre\_processing}
+  \begin{lstlisting}
+    bool nesterov_a_test_task_seq::TestTaskSequential::pre_processing() {
+      internal_order_test();
+      // Init value for input and output
+      input_ = reinterpret_cast<int*>(taskData->inputs[0])[0];
+      res = 0;
+      return true;
+    }
+  \end{lstlisting}
+
+  \lstset{style=CStyle, caption=src/ops\_seq.cpp | validation}
+  \begin{lstlisting}
+    bool nesterov_a_test_task_seq::TestTaskSequential::validation() {
+      internal_order_test();
+      // Check count elements of output
+      return taskData->inputs_count[0] == 1 && taskData->outputs_count[0] == 1;
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Task's source code}
+  \lstset{style=CStyle, caption=src/ops\_seq.cpp | run}
+  \begin{lstlisting}
+    bool nesterov_a_test_task_seq::TestTaskSequential::run() {
+      internal_order_test();
+      for (int i = 0; i < input_; i++) {
+        res++;
+      }
+      return true;
+    }
+  \end{lstlisting}
+
+  \lstset{style=CStyle, caption=src/ops\_seq.cpp | post\_processing}
+  \begin{lstlisting}
+    bool nesterov_a_test_task_seq::TestTaskSequential::post_processing() {
+      internal_order_test();
+      reinterpret_cast<int*>(taskData->outputs[0])[0] = res;
+      return true;
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Task's functional tests}
+  \lstset{style=CStyle, caption=func\_tests/main.cpp}
+  \begin{lstlisting}
+    TEST(Sequential, Test_Sum_10) {
+      const int count = 10;
+    
+      // Create data
+      std::vector<int> in(1, count);
+      std::vector<int> out(1, 0);
+    
+      // Create TaskData
+      std::shared_ptr<ppc::core::TaskData> taskDataSeq = std::make_shared<ppc::core::TaskData>();
+      taskDataSeq->inputs.emplace_back(reinterpret_cast<uint8_t *>(in.data()));
+      taskDataSeq->inputs_count.emplace_back(in.size());
+      taskDataSeq->outputs.emplace_back(reinterpret_cast<uint8_t *>(out.data()));
+      taskDataSeq->outputs_count.emplace_back(out.size());
+    
+      // Create Task
+      nesterov_a_test_task_seq::TestTaskSequential testTaskSequential(taskDataSeq);
+      ASSERT_EQ(testTaskSequential.validation(), true);
+      testTaskSequential.pre_processing();
+      testTaskSequential.run();
+      testTaskSequential.post_processing();
+      ASSERT_EQ(count, out[0]);
+    }    
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{TaskData structure}
+  \lstset{style=CStyle, caption=TaskData}
+  \begin{lstlisting}
+    struct TaskData {
+      std::vector<uint8_t *> inputs;
+      std::vector<std::uint32_t> inputs_count;
+      std::vector<uint8_t *> outputs;
+      std::vector<std::uint32_t> outputs_count;
+      enum StateOfTesting { FUNC, PERF } state_of_testing;
+    };
+  \end{lstlisting}
+  \lstset{style=CStyle, caption=Functions order}
+  \begin{lstlisting}
+    std::vector<std::string> right_functions_order  = 
+        {"validation", 
+         "pre_processing", 
+         "run", 
+         "post_processing"};
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Task's performance tests - part 1}
+  \lstset{style=CStyle, caption=perf\_tests/main.cpp}
+  \begin{lstlisting}
+    TEST(sequential_example_perf_test, test_pipeline_run) {
+      const int count = 100;
+    
+      // Create data
+      std::vector<int> in(1, count);
+      std::vector<int> out(1, 0);
+    
+      // Create TaskData
+      std::shared_ptr<ppc::core::TaskData> taskDataSeq = std::make_shared<ppc::core::TaskData>();
+      taskDataSeq->inputs.emplace_back(reinterpret_cast<uint8_t *>(in.data()));
+      taskDataSeq->inputs_count.emplace_back(in.size());
+      taskDataSeq->outputs.emplace_back(reinterpret_cast<uint8_t *>(out.data()));
+      taskDataSeq->outputs_count.emplace_back(out.size());
+    
+      // Create Task
+      auto testTaskSequential = std::make_shared<nesterov_a_test_task_seq::TestTaskSequential>(taskDataSeq);
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Task's performance tests - part 2}
+  \lstset{style=CStyle, caption=perf\_tests/main.cpp}
+  \begin{lstlisting}
+      // Create Perf attributes
+      auto perfAttr = std::make_shared<ppc::core::PerfAttr>();
+      perfAttr->num_running = 10;
+      const auto t0 = std::chrono::high_resolution_clock::now();
+      perfAttr->current_timer = [&] {
+        auto current_time_point = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(current_time_point - t0).count();
+        return static_cast<double>(duration) * 1e-9;
+      };
+    
+      // Create and init perf results
+      auto perfResults = std::make_shared<ppc::core::PerfResults>();
+    
+      // Create Perf analyzer
+      auto perfAnalyzer = std::make_shared<ppc::core::Perf>(testTaskSequential);
+      perfAnalyzer->pipeline_run(perfAttr, perfResults);
+      ppc::core::Perf::print_perf_statistic(perfResults);
+      ASSERT_EQ(count, out[0]);
+    }
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Practice}
+  Practice
+\end{frame}
+
 \begin{frame}{References}
   \begin{itemize}
     \item PPC Repository \href{https://github.com/learning-process/parallel\_programming\_course}{https://github.com/learning-process/parallel\_programming\_course}
