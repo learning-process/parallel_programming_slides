@@ -1,1 +1,2 @@
-\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
+\beamer@sectionintoc {1}{The introduction to the repository}{3}{0}{1}
+\beamer@sectionintoc {2}{How to submit your work}{7}{0}{2}

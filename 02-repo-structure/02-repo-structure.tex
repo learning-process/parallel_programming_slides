@@ -64,17 +64,121 @@
     \tableofcontents
 \end{frame}
 
-\section{Introduction}
+\section{The introduction to the repository}
 
-\begin{frame}{Slide}
+\begin{frame}[fragile]{Parallel programming technologies}
+  \begin{itemize}
+    \item \textbf{MPI}
+    \item OpenMP
+    \item TBB
+    \item std::thread
+  \end{itemize}
 \end{frame}
 
-\begin{frame}
-    \centering
-    \Huge{Thank You!}
+\begin{frame}[fragile]{Step-by-step guide to build the project}
+  \begin{itemize}
+    \item Download all submodules
+    \item Set up your environment
+    \item Build the project with CMake
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Download all submodules \& Set up your environment}
+
+  \lstset{style=CStyle, caption=Git submodules}
+  \begin{lstlisting}
+    git submodule update --init --recursive
+  \end{lstlisting}
+
+    \lstset{style=CStyle, caption=Download MPI}
+  \begin{lstlisting}
+    // Windows
+    msmpisdk.msi & msmpisetup.exe
+    // Linux (gcc and clang)
+    sudo apt install -y mpich openmpi-bin libopenmpi-dev
+    // MacOS (apple clang)
+    brew install open-mpi
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]{Build the project with help CMake}
+
+  \lstset{style=CStyle, caption=Configure the build}
+  \begin{lstlisting}
+    cmake -S <source code/path to CMakeLists.txt> \
+          -B <build directory> \
+          -D USE_SEQ=ON \
+          -D USE_MPI=ON \ 
+          -D USE_FUNC_TESTS=ON \
+          -D USE_PERF_TESTS=ON \
+          -D CMAKE_BUILD_TYPE=Release ..
+  \end{lstlisting}
+
+  \lstset{style=CStyle, caption=Build the project}
+  \begin{lstlisting}
+    cmake --build <build directory> \
+          --config Release \
+          --parallel
+  \end{lstlisting}
+
+\end{frame}
+
+\section{How to submit your work}
+
+\begin{frame}[fragile]{Directories}
+  \begin{table}[h!]
+    \resizebox{8cm}{!} {
+      \begin{tabular}{| p{4.2 cm} | p{4.2 cm} |}
+      \hline
+      \textbf{Directory} & \textbf{What is it?} \\
+      \hline
+      \textbf{.github/workflows} & CI \\
+      \hline
+      \textbf{1stsamples} & Simple examples \\
+      \hline
+      \textbf{3rdparty} & Auxiliary libraries \\
+      \hline
+      \textbf{cmake} & CMake scripts \\
+      \hline
+      \textbf{modules} & API source code \\
+      \hline
+      \textbf{scripts} & Auxiliary scripts \\
+      \hline
+      \textbf{tasks} & Students tasks \\
+      \hline
+    \end{tabular}
+    }
+    \caption{Root directories}
+  \end{table}
+
+  \begin{table}[h!]
+    \resizebox{8cm}{!} {
+    \begin{tabular}{| p{4.2 cm} | p{4.2 cm} |}
+      \hline
+      \textbf{Directory} & \textbf{What is it?} \\
+      \hline
+      \textbf{mpi} & MPI \\
+      \hline
+      \textbf{omp} & OpenMP \\
+      \hline
+      \textbf{seq} & Sequential \\
+      \hline
+      \textbf{stl} & std:thread \\
+      \hline
+      \textbf{tbb} & Threading Building Blocks \\
+      \hline
+    \end{tabular}
+    }
+    \caption{Tasks directories}
+  \end{table}
+
 \end{frame}
 
 \begin{frame}{References}
+  \begin{itemize}
+    \item PPC Repository \href{https://github.com/learning-process/parallel\_programming\_course}{https://github.com/learning-process/parallel\_programming\_course}
+  \end{itemize}
 \end{frame}
 
 \end{document}
