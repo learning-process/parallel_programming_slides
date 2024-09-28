@@ -177,14 +177,23 @@
 
   \texttt{int MPI\_Bcast(void *buffer, int count, MPI\_Datatype datatype, int root, MPI\_Comm comm);}
 
-  Parameters:
-  \begin{itemize}
-    \item buffer: Starting address of buffer.
-    \item count: Number of entries in buffer.
-    \item datatype: Data type of buffer elements.
-    \item root: Rank of broadcast root.
-    \item comm: Communicator.
-  \end{itemize}
+  \begin{minipage}[t]{0.6\textwidth}
+    Parameters:
+    \begin{itemize}
+      \item buffer: Starting address of buffer.
+      \item count: Number of entries in buffer.
+      \item datatype: Data type of buffer elements.
+      \item root: Rank of broadcast root.
+      \item comm: Communicator.
+    \end{itemize}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.35\textwidth}
+    \begin{figure}[h]
+      \includegraphics[]{images/broadcast.png}
+    \end{figure}
+  \end{minipage}
+  {\footnotesize Source: \href{https://pdc-support.github.io/introduction-to-mpi/07-collective/index.html}{https://pdc-support.github.io/introduction-to-mpi/07-collective/index.html}}
 \end{frame}
 
 \begin{frame}{Reduction}
@@ -192,15 +201,24 @@
 
   Can be seen as the opposite operation to broadcast.
 
-  \texttt{int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm);}
+  \texttt{int MPI\_Reduce(const void *sendbuf, void *recvbuf, int count, MPI\_Datatype datatype, MPI\_Op op, int root, MPI\_Comm comm);}
 
-  Supported operations:
-  \begin{itemize}
-    \item \texttt{MPI\_SUM}
-    \item \texttt{MPI\_PROD}
-    \item \texttt{MPI\_MAX}
-    \item \texttt{MPI\_MIN}
-  \end{itemize}
+  \begin{minipage}[t]{0.2\textwidth}
+    Supported operations:
+    \begin{itemize}
+      \item \texttt{MPI\_SUM}
+      \item \texttt{MPI\_PROD}
+      \item \texttt{MPI\_MAX}
+      \item \texttt{MPI\_MIN}
+    \end{itemize}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.75\textwidth}
+    \begin{figure}[h]
+      \includegraphics[]{images/reduction.png}
+    \end{figure}
+  \end{minipage}
+  {\footnotesize Source: \href{https://pdc-support.github.io/introduction-to-mpi/07-collective/index.html}{https://pdc-support.github.io/introduction-to-mpi/07-collective/index.html}}
 \end{frame}
 
 \begin{frame}{\texttt{MPI\_Gather}}
@@ -208,11 +226,20 @@
 
   \texttt{int MPI\_Gather(const void *sendbuf, int sendcount, MPI\_Datatype sendtype, void *recvbuf, int recvcount, MPI\_Datatype recvtype, int root, MPI\_Comm comm);}
 
-  Parameters:
-  \begin{itemize}
-    \item sendbuf: Starting address of send buffer.
-    \item recvbuf: Starting address of receive buffer (significant only at root).
-  \end{itemize}
+  \begin{minipage}[t]{0.6\textwidth}
+    Parameters:
+    \begin{itemize}
+      \item sendbuf: Starting address of send buffer.
+      \item recvbuf: Starting address of receive buffer (significant only at root).
+    \end{itemize}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.35\textwidth}
+    \begin{figure}[h]
+      \includegraphics[]{images/gather.png}
+    \end{figure}
+  \end{minipage}
+  {\footnotesize Source: \href{https://pdc-support.github.io/introduction-to-mpi/07-collective/index.html}{https://pdc-support.github.io/introduction-to-mpi/07-collective/index.html}}
 \end{frame}
 
 \begin{frame}{\texttt{MPI\_Scatter}}
@@ -220,11 +247,20 @@
 
   \texttt{int MPI\_Scatter(const void *sendbuf, int sendcount, MPI\_Datatype sendtype, void *recvbuf, int recvcount, MPI\_Datatype recvtype, int root, MPI\_Comm comm);}
 
-  Parameters:
-  \begin{itemize}
-    \item \texttt{sendbuf}: Starting address of send buffer (significant only at root).
-    \item \texttt{recvbuf}: Starting address of receive buffer.
-  \end{itemize}
+  \begin{minipage}[t]{0.6\textwidth}
+    Parameters:
+    \begin{itemize}
+      \item \texttt{sendbuf}: Starting address of send buffer (significant only at root).
+      \item \texttt{recvbuf}: Starting address of receive buffer.
+    \end{itemize}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.35\textwidth}
+    \begin{figure}[h]
+      \includegraphics[]{images/gather.png}
+    \end{figure}
+  \end{minipage}
+  {\footnotesize Source: \href{https://pdc-support.github.io/introduction-to-mpi/07-collective/index.html}{https://pdc-support.github.io/introduction-to-mpi/07-collective/index.html}}
 \end{frame}
 
 \begin{frame}{\texttt{MPI\_AllGather}}
