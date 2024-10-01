@@ -64,12 +64,124 @@
     \tableofcontents
 \end{frame}
 
-\section{Parallelism efficiency}
+\section{Parallelism efficiency metrics}
 
-\begin{frame}{Parallelism metrics}
+\begin{frame}{Parallelism efficiency metrics}
+  Let us introduce a number of terms used in parallel programming theory:
+  \begin{itemize}
+    \item \textbf{Speedup (S)}: Ratio of the execution time of the best sequential algorithm to the execution time of the parallel algorithm.
+    \[
+    S = \frac{T_1}{T_p}
+    \]
+    \item \textbf{Efficiency (E)}: Measure of how effectively the computational resources are being utilized.
+    \[
+    E = \frac{S}{p} = \frac{T_1}{p \times T_p}
+    \]
+    \item \textbf{Scalability}: Ability of a system to maintain performance when the number of processors increases.
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Amdahl's law}
+\section{Amdahl's Law}
+
+\begin{frame}{Amdahl's Law}
+  Amdahl's Law addresses the maximum improvement to an overall system when only part of the system is improved.
+  \begin{itemize}
+    \item Formula:
+    \[
+    S_{\text{max}} = \frac{1}{(1 - P) + \frac{P}{N}}
+    \]
+    \item Where:
+    \begin{itemize}
+      \item \( P \) is the proportion of the program that can be made parallel.
+      \item \( N \) is the number of processors.
+    \end{itemize}
+    \item Implications:
+    \begin{itemize}
+      \item Diminishing returns as \( N \) increases.
+      \item Emphasizes optimizing the sequential portion.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Amdahl's Law example}
+  \begin{itemize}
+    \item Assuming 90\% of a task can be parallelized (P = 0.9) and we have 4 processors (N = 4):
+    \item Formula:
+    \[
+    S_{\text{max}} = \frac{1}{(1 - P) + \frac{P}{N}}
+    \]
+    \item Calculating for this particular example:
+    \[
+    S = \frac{1}{(1 - 0.9) + \frac{0.9}{4}} = \frac{1}{0.1 + 0.225} = \frac{1}{0.325} \approx 3.08
+    \]
+    \item So, even though we have 4 processors, the speedup is only about 3.08 times faster than a single processor due to the non-parallelizable portion.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Amdahl's Law assumptions and limitations}
+  Note that:
+  \begin{itemize}
+    \item Amdahl's Law assumes that the overhead of splitting and managing parallel tasks is (infinitely) small, which may not always be true.
+    \item It doesn't account for other practical factors like memory access contention, communication delays between processors, or the complexity of load balancing.
+  \end{itemize}
+\end{frame}
+
+\section{Gustafson's Law (Gustafson-Barsis's Law)}
+
+\begin{frame}{Gustafson's Law (Gustafson-Barsis's Law)}
+  Gustafson's Law, also known as Gustafson-Barsis's Law is a principle in parallel computing that addresses the scalability of parallel systems.
+  \begin{itemize}
+    \item Key note: Gustafson's Law suggests that the overall speedup in a parallel system is determined not only by the fraction of the task that can be parallelized but also by the size of the problem being solved. As the problem size increases, the potential speedup from parallelism also increases.
+    \item Formula:
+    \[
+    S(p) = p - \alpha(p - 1)
+    \]
+    \item Where:
+    \begin{itemize}
+      \item \( S(p) \) is the speedup with \( p \) processors.
+      \item \( \alpha \) is the fraction of the workload that must be executed serially (i.e., non-parallelizable).
+      \item \( p \) is the number of processors.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Gustafson's Law notes}
+  Note that:
+  \begin{itemize}
+    \item Unlike Amdahl's Law, Gustafson's Law argues that by increasing the size of the problem, the parallel portion can dominate, allowing for more effective use of additional processors.
+    \item Gustafson's Law is more realistic in situations where the problem size increases with the number of processors.
+    \item As the problem size grows, the portion that can be parallelized becomes larger, thus maximizing the benefit of adding more processors.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Parallelism overhead}
+  Basically, parallelism overhead is the extra time that is required to manage parallel tasks.
+
+  Sources of overhead:
+  \begin{itemize}
+    \item Communication between processors.
+    \item Synchronization delays.
+    \item Data sharing and contention.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Best Practices for Efficient Parallelism}
+  \begin{itemize}
+    \item Minimize synchronization and communication.
+    \item Balance load among processors.
+    \item Optimize data locality.
+    \item Use appropriate parallel programming constructs.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Flynn's Classification}
+  \begin{itemize}
+    \item Categorizes computer architectures based on instruction and data streams.
+    \item SISD: Single Instruction, Single Data.
+    \item SIMD: Single Instruction, Multiple Data.
+    \item MISD: Multiple Instruction, Single Data.
+    \item MIMD: Multiple Instruction, Multiple Data.
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
