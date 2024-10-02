@@ -175,13 +175,16 @@
 \end{frame}
 
 \begin{frame}{Flynn's Classification}
-  \begin{itemize}
-    \item Categorizes computer architectures based on instruction and data streams.
-    \item SISD: Single Instruction, Single Data.
-    \item SIMD: Single Instruction, Multiple Data.
-    \item MISD: Multiple Instruction, Single Data.
-    \item MIMD: Multiple Instruction, Multiple Data.
-  \end{itemize}
+  Categorizes computer architectures based on instruction and data streams.
+  \begin{tabular}{| p{2.1cm} | p{4.2 cm} | p{4.2 cm} |}
+    \hline
+    & \textbf{Single Instruction (SI)} & \textbf{Multiple Instructions (MI)} \\
+    \hline
+    \textbf{Single Data (SD)} & Traditional single-core processors & Fault-tolerant systems (e.g. space shuttle control systems) \\
+    \hline
+    \textbf{Multiple Data (MD)} & Vector instruction in CPU, Graphics Processing Units (GPUs) & Multi-core processors, Distributed computing systems \\
+    \hline
+  \end{tabular}
 \end{frame}
 
 \begin{frame}
