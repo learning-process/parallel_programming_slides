@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
         MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
     
         // Define message
-        int number;
+        int number = 0;
         if (world_rank == 0) {
             // If we are rank 0, set number to -1 and send it to process 1
             number = -1;
