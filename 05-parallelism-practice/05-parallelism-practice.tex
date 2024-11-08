@@ -109,7 +109,7 @@
     \item Matrix Multiplication
     \item Systems of Linear Algebraic Equations
     \item Sort
-    \item Computer Graphics
+    \item Image Processing
   \end{itemize}
 \end{frame}
 
@@ -117,6 +117,7 @@
   \begin{itemize}
     \item All matrices should be stored in linear arrays (not \texttt{std::vector<std::vector<int> >})
     \item Performance should be meauserd on big matrices/vectors
+    \item Total execution time (per test) is more than 1 second
     \item Functionality should be preserved for wide range of processes count
   \end{itemize}
 \end{frame}
@@ -189,7 +190,8 @@
   \begin{itemize}
     \item Requirement: Put the task you have chosen in the description
     \item Reference implementation: original MPI function
-    \item Tasks size should be big. Broadcast should send more that one element (vector).
+    \item Tasks size should be big. Broadcast should send more that one element (vector)
+    \item Consider using binary trees to distribute data across different processes
   \end{itemize}
 \end{frame}
 
@@ -257,6 +259,12 @@
   Validate shapes (if matmul is possible for these shapes)
 \end{frame}
 
+\begin{frame}{Matrix Multiplication}
+  \begin{figure}[h]
+    \includegraphics[width=1\textwidth]{images/matrix-multiplication.png}
+  \end{figure}
+\end{frame}
+
 \section{Systems of Linear Algebraic Equations}
 
 \begin{frame}{Systems of Linear Algebraic Equations}
@@ -291,9 +299,9 @@
   \end{itemize}
 \end{frame}
 
-\section{Computer Graphics}
+\section{Image Processing}
 
-\begin{frame}{Computer Graphics}
+\begin{frame}{Image Processing}
   \begin{itemize}
     \item Image Smoothing
     \item Contrast Enhancement
