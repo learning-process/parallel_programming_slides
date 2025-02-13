@@ -1,0 +1,297 @@
+\documentclass{beamer}
+
+% Theme choice
+\usetheme{Madrid}
+
+% Optional packages
+\usepackage{graphicx} % For including images
+\usepackage{amsmath}  % For math symbols and formulas
+\usepackage{hyperref} % For hyperlinks
+\usepackage{tikz}     % For charts
+
+% Title, author, date, and institute (optional)
+\title[Parallel Programming Course. Administrative questions.]{Parallel Programming Course. \\Administrative questions.}
+\author{Nesterov Alexander, Obolenskiy Arseniy}
+\institute{Nizhny Novgorod State University}
+
+\date{\today} % or \date{Month Day, Year}
+
+% Redefine the footline to display both the short title and the university name
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.45\paperwidth,ht=2.5ex,dp=1ex,leftskip=1em,center]{author in head/foot}%
+        \usebeamerfont{author in head/foot}\insertshortinstitute % Displays the university name
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.45\paperwidth,ht=2.5ex,dp=1ex,leftskip=1em,center]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\insertshorttitle % Displays the short title
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.1\paperwidth,ht=2.5ex,dp=1ex,rightskip=1em,center]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\insertframenumber{} / \inserttotalframenumber
+    \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\begin{document}
+
+% Title slide
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}{Today}
+    \tableofcontents
+\end{frame}
+
+\section{Introduction}\label{sec:introduction}
+\begin{frame}{Introduction}
+    Parallel Programming Course \\
+    Contacts:
+    \begin{itemize}
+        \item Nesterov Alexander \\
+            E-mail: nesterov.alexander@outlook.com
+        \item Obolenskiy Arseniy \\
+            E-mail: me@gooddoog.ru
+    \end{itemize}
+\end{frame}
+
+
+\section{Structure of overall course}\label{sec:structure-of-overall-course}
+
+\begin{frame}{Structure of overall course}
+    \begin{center}
+        \begin{tikzpicture}
+            [
+                level 1/.style={sibling distance=50mm},
+                level 2/.style={sibling distance=30mm},
+                ->, >=latex
+            ]
+            \node {Parallel Programming Basics}
+                child {
+                    node {Distributed memory}
+                    child {
+                        node[align=center] {Message Passing Interface \\ (MPI)}
+                        child {
+                            node {Autumn Semester}
+                        }
+                    }
+                }
+                child {
+                    node {Shared memory}
+                    child {
+                        node[align=center] {OpenMP, TBB, std::thread, \\ MPI + Threads}
+                        child {
+                            node {Spring Semester}
+                        }
+                    }
+                };
+        \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+\section{Structure of the current semester}\label{sec:structure-of-the-current-semester}
+
+\begin{frame}{Structure of the current semester}
+    \begin{center}
+        \begin{tikzpicture}
+            [
+                level 1/.style={sibling distance=25mm},
+                level 2/.style={sibling distance=5mm},
+                ->, >=latex
+            ]
+            \node {Threading tasks}
+                child {
+                    node {Sequential}
+                }
+                child {
+                    node {OpenMP}
+                }
+                child {
+                    node {TBB}
+                }
+                child {
+                    node {std::thread}
+                }
+                child {
+                    node {MPI + Threads}
+                };
+        \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+\section{Practice details}\label{sec:practice-details}
+
+\begin{frame}{Practice details}
+    \begin{itemize}
+        \item Practice format: Online
+        \item Random distribution of task variations
+        \item Deadlines for each task
+        \item Work organization in a single repository for all groups
+        \item Self-review by students (2 students)
+        \item Full automation of quality and performance checks
+        \item Optional reporting (written)
+        \item Points-based grading system
+        \item Plagiarism check of submitted tasks
+        \item Main communication channel: Telegram (only channels), e-mail, GitHub Issues
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Points distribution}
+    \begin{center}
+        \begin{tikzpicture}
+            [
+                level 1/.style={sibling distance=60mm},
+                level 2/.style={sibling distance=30mm},
+                ->, >=latex
+            ]
+            \node {Points}
+                child {
+                    node[scale=0.7, align=center] {
+                        Lectures
+                        Practice \\
+                        (max: 36 points)
+                    }
+                    child {
+                        node[scale=0.6, align=center] {
+                            Exam test \\
+                            Comment: Conducted \\ by the course lecturer \\
+                            (Please ask \\ about test's requirements)
+                        }
+                    }
+                }
+                child {
+                    node[scale=0.7, align=center] {
+                        Practice \\
+                        (max: 64 points)
+                    }
+                    child {
+                        node [scale=0.7, align=center]{Tasks (max: 54 points)}
+                        child {
+                            node[scale=0.6, align=center] {
+                                Comment: The tasks that \\
+                                will be solved in practice \\
+                                during the semester.
+                            }
+                        }
+                    }
+                    child {
+                        node [scale=0.7, align=center]{
+                            Report (max: 10 points)
+                        }
+                        child {
+                            node[scale=0.6, align=center] {
+                                Comment: An optional report \\
+                                for the final task, \\
+                                written using LaTeX.
+                            }
+                        }
+                    }
+                };
+        \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Tasks points distribution (max: 54 points)}
+    Sequential tasks: 4
+    \begin{itemize}
+        \item Solution implementation: 4
+    \end{itemize}
+    OpenMP tasks: 9
+    \begin{itemize}
+        \item Solution implementation: 6
+        \item Performance: 3
+    \end{itemize}
+    TBB tasks: 9
+    \begin{itemize}
+        \item Solution implementation: 6
+        \item Performance: 3
+    \end{itemize}
+    std::thread tasks: 14
+    \begin{itemize}
+        \item Solution implementation: 8
+        \item Performance: 6
+    \end{itemize}
+    “MPI + threads” tasks: 18
+    \begin{itemize}
+        \item Solution implementation: 10
+        \item Performance: 8
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Report (max: 10 points)}
+    Report: 10
+    \begin{itemize}
+        \item The presence of the required items in the report format: 5
+        \item Text quality and formatting: 5
+    \end{itemize}
+\end{frame}
+
+\section{Administrative questions}\label{sec:administrative-questions}
+
+\begin{frame}{Assessments schedule}
+    \begin{center}
+        \begin{tikzpicture}
+            [
+                level 1/.style={sibling distance=40mm},
+                ->, >=latex
+            ]
+            \node {Assessments}
+                child {
+                    node [scale=0.7, align=center] {
+                        Fundamental informatics \\
+                        Autumn: Exam \\
+                        Spring: Exam
+                    }
+                }
+                child {
+                    node [scale=0.7, align=center] {
+                        Software enginerring \\
+                        Autumn: Test (pass/fail) \\
+                        Spring: Exam
+                    }
+                }
+                child {
+                    node [scale=0.7, align=center] {
+                        Applied maths and informatics \\
+                        Autumn: Test (pass/fail) \\
+                        Spring: Test (pass/fail)
+                    }
+                };
+        \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+\begin{frame}{Mark criterias}
+    \begin{itemize}
+        \item 5.5 (superb) - 99-100 points
+        \item 5 (excellent) - 92-98 points
+        \item 4.5 (very good) - 82-91 points
+        \item 4 (good) - 70-81 points
+        \item 3 (satisfactory or pass) - 50-69 points
+        \item below - fail
+    \end{itemize}
+\end{frame}
+
+\section{What will be covered in the next practice?}\label{sec:what-will-be-covered-in-the-next-practice?}
+
+\begin{frame}{Next steps}
+    \begin{itemize}
+        \item Practice 1 (OpenMP)
+        \item Practice 2 (TBB)
+        \item Practice 3 (std::thread)
+    \end{itemize}
+\end{frame}
+
+\section{Q\&A section}
+
+\begin{frame}{Q\&A}
+    \centering
+    Any questions?
+\end{frame}
+
+\begin{frame}
+    \centering
+    \Huge{Thank You!}
+\end{frame}
+
+\end{document}
