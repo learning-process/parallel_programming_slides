@@ -1,0 +1,655 @@
+\documentclass{beamer}
+
+% Theme choice
+\usetheme{Madrid}
+
+% Optional packages
+\usepackage{graphicx} % For including images
+\usepackage{amsmath}  % For math symbols and formulas
+\usepackage{hyperref} % For hyperlinks
+\usepackage{tikz}     % For charts
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[T1]{fontenc}
+
+\lstdefinestyle{CStyle}{
+  language=C,                    % Set the language to C
+  basicstyle=\ttfamily\footnotesize\linespread{0.9}\tiny, % Set font style and size
+  keywordstyle=\color{blue},      % Color of keywords
+  commentstyle=\color{gray},      % Color of comments
+  stringstyle=\color{red},        % Color of strings
+  showstringspaces=false,         % Do not mark spaces in strings
+  breaklines=true,                % Enable line breaks at appropriate places
+  breakatwhitespace=false,        % Break lines at any character, not just whitespace
+  numbers=left,                   % Show line numbers on the left
+  numberstyle=\tiny\color{gray},  % Style for line numbers
+  tabsize=4,                      % Set tab width
+  keepspaces=true,                % Keep indentation spaces
+  frame=single,                   % Add a border around the code
+  aboveskip=0pt,                  % Reduce space above the code block
+  belowskip=0pt,                   % Reduce space below the code block
+  xleftmargin=7.5pt,                      % Add left padding (approx. 2.8mm or 10px)
+  xrightmargin=15pt,                      % Add left padding (approx. 2.8mm or 10px)
+}
+
+% Title, author, date, and institute (optional)
+\title[Parallel Programming Course. OpenMP.]{Parallel Programming Course. \\OpenMP.}
+\author{Obolenskiy Arseniy, Nesterov Alexander}
+\institute{Nizhny Novgorod State University}
+
+\date{\today} % or \date{Month Day, Year}
+
+% Redefine the footline to display both the short title and the university name
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.45\paperwidth,ht=2.5ex,dp=1ex,leftskip=1em,center]{author in head/foot}%
+        \usebeamerfont{author in head/foot}\insertshortinstitute % Displays the university name
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.45\paperwidth,ht=2.5ex,dp=1ex,leftskip=1em,center]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\insertshorttitle % Displays the short title
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.1\paperwidth,ht=2.5ex,dp=1ex,rightskip=1em,center]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\insertframenumber{} / \inserttotalframenumber
+    \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\begin{document}
+
+% Title slide
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Today}
+  \tableofcontents
+\end{frame}
+
+\section{Introduction to OpenMP}
+\begin{frame}{What is OpenMP?}
+  \begin{itemize}
+    \item Brief overview
+    \item Importance in parallel computing
+    \item Use cases
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{What is OpenMP?}
+  \begin{itemize}
+    \item Open standard for parallel programming
+    \item Supports multi-platform shared-memory multiprocessing
+    \item Used in computational science, engineering, and simulations
+  \end{itemize}
+\end{frame}
+
+\section{Hello World}
+\begin{frame}[fragile]{Your First OpenMP Program}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include <omp.h>
+#include <stdio.h>
+
+int main() {
+  #pragma omp parallel
+  {
+    printf("Hello from thread %d\n", omp_get_thread_num());
+  }
+  return 0;
+}
+  \end{lstlisting}
+\end{frame}
+
+\section{Basic OpenMP Features}
+\begin{frame}{OpenMP Features}
+    \begin{itemize}
+      \item Compiler directives
+      \item Runtime library functions
+      \item Environment variables
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Basic OpenMP Features}
+  OpenMP provides three primary mechanisms to express parallelism clearly and effectively:
+
+   \begin{itemize}
+    \item Compiler directives (\texttt{\#pragma omp})
+    \item Runtime library functions
+    \item Environment variables
+  \end{itemize}
+\end{frame}
+
+\section{Compiler Directives and Clauses}
+\begin{frame}[fragile]{Compiler Directives}
+  Compiler directives guide the compiler to parallelize sections of code.
+
+  General syntax:
+  \begin{verbatim}
+    #pragma omp directive [clauses]
+  \end{verbatim}
+
+  Commonly used directives:
+  \begin{itemize}
+    \item \texttt{parallel} — Creates parallel threads.
+    \item \texttt{for} — Parallelizes loop iterations.
+    \item \texttt{section} — Defines parallel sections.
+  \end{itemize}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel for
+for(int i = 0; i < N; i++) {
+  a[i] = b[i] + c[i];
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{The \texttt{parallel} Directive}
+  The \texttt{parallel} directive starts a parallel region executed by multiple threads.
+
+  Syntax:
+  \begin{verbatim}
+    #pragma omp parallel [clauses]
+    {
+      // Code executed in parallel
+    }
+  \end{verbatim}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel
+{
+  printf("Thread %d is running\n", omp_get_thread_num());
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{The \texttt{for} Directive}
+  The \texttt{for} directive parallelizes loops among threads.
+
+  To take an effect it must be within an existing parallel region:
+
+  Syntax:
+  \begin{verbatim}
+    #pragma omp for [clauses]
+    for (init; condition; increment) {
+      // Loop body
+    }
+  \end{verbatim}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel
+{
+  #pragma omp for
+  for (int i = 0; i < N; i++) {
+    array[i] = compute(i);
+  }
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{The \texttt{parallel for} Directive}
+  Combines the \texttt{parallel} and \texttt{for} directives, simplifying syntax.
+
+  Syntax:
+  \begin{verbatim}
+    #pragma omp parallel for [clauses]
+    for (init; condition; increment) {
+      // Loop body
+    }
+  \end{verbatim}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel for
+for (int i = 0; i < N; i++) {
+  data[i] = process(i);
+}
+  \end{lstlisting}
+
+  This is equivalent to a \texttt{parallel} region with a single \texttt{for} loop.
+\end{frame}
+
+\begin{frame}[fragile]{Clauses: \texttt{private} and \texttt{shared}}
+  Applicable to directives:
+  \begin{itemize}
+    \item \texttt{parallel}, \texttt{for}, \texttt{parallel for}
+  \end{itemize}
+
+  Controls the scope of variables:
+
+  \begin{itemize}
+    \item \texttt{shared(var)}: Variable shared among threads (default).
+    \item \texttt{private(var)}: Each thread gets its own private copy.
+  \end{itemize}
+
+  Example (\texttt{parallel for}):
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+int temp = 0;
+#pragma omp parallel for private(temp)
+for(int i = 0; i < N; i++) {
+    temp = compute(i);
+    result[i] = temp;
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Clause: \texttt{schedule}}
+  Applicable to directives:
+  \begin{itemize}
+    \item \texttt{for}, \texttt{parallel for}
+  \end{itemize}
+
+  Controls iteration distribution among threads:
+
+  Syntax:
+  \begin{verbatim}
+    schedule(type, chunk_size)
+  \end{verbatim}
+
+  Types:
+  \begin{itemize}
+    \item \texttt{static} (default)
+    \item \texttt{dynamic}
+    \item \texttt{guided}
+  \end{itemize}
+
+  Example (\texttt{parallel for}):
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel for schedule(dynamic,4)
+for(int i = 0; i < N; i++) {
+  heavy_computation(i);
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Clause: \texttt{reduction}}
+  Applicable to directives:
+  \begin{itemize}
+    \item \texttt{parallel}, \texttt{for}, \texttt{parallel for}
+  \end{itemize}
+
+  Combines thread results safely into one variable.
+
+  Syntax:
+  \begin{verbatim}
+    reduction(operator: variable)
+  \end{verbatim}
+
+  Common operators: \texttt{+, -, *, max, min}
+
+  Example (\texttt{parallel for}):
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+int total = 0;
+#pragma omp parallel for reduction(+:total)
+for(int i = 0; i < N; i++) {
+    total += array[i];
+}
+printf("Sum = %d\n", total);
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Clause: \texttt{num\_threads}}
+  Applicable to directives:
+  \begin{itemize}
+    \item \texttt{parallel}, \texttt{parallel for}
+  \end{itemize}
+
+  Sets number of threads explicitly:
+
+  Syntax:
+  \begin{verbatim}
+    num_threads(number_of_threads)
+  \end{verbatim}
+
+  Example (\texttt{parallel for}):
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel for num_threads(8)
+for(int i = 0; i < N; i++) {
+    compute(i);
+}
+  \end{lstlisting}
+
+  Overrides default thread count and environment settings.
+\end{frame}
+
+
+\begin{frame}[fragile]{Sections}
+  Use the \texttt{sections} directive to run independent tasks in parallel:
+
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel sections
+{
+  #pragma omp section
+  {
+    compute_task_A();
+  }
+  #pragma omp section
+  {
+    compute_task_B();
+  }
+  #pragma omp section
+  {
+    compute_task_C();
+  }
+}
+  \end{lstlisting}
+\end{frame}
+
+\section{Synchronization and Data Sharing}
+\begin{frame}{Synchronization and Data Sharing}
+  \begin{itemize}
+    \item Barrier
+    \item Critical sections
+    \item Atomic operations
+    \item Built-in reduction operation
+    \item OpenMP locks (similar to mutex)
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{OpenMP Barrier (\texttt{barrier})}
+  Synchronizes threads explicitly; threads wait at the barrier until all threads arrive.
+
+  Syntax:
+  \begin{verbatim}
+    #pragma omp barrier
+  \end{verbatim}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+  #pragma omp parallel
+  {
+      compute_part1();
+
+      #pragma omp barrier  // All threads wait here
+
+      compute_part2();  // Starts only after all threads
+                        // finish compute_part1()
+  }
+  \end{lstlisting}
+
+  Barrier ensures correct sequence in parallel regions.
+\end{frame}
+
+\begin{frame}[fragile]{Critical Sections (\texttt{critical})}
+  \textbf{Purpose:}
+  Ensures only one thread executes a code region at a time, preventing race conditions.
+
+  Syntax:
+  \begin{verbatim}
+    #pragma omp critical [name]
+    {
+      // critical section
+    }
+  \end{verbatim}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel
+{
+  #pragma omp critical
+  {
+    sum += compute_value();
+  }
+}
+  \end{lstlisting}
+
+  Usage of this directive ensures safe access to the shared variables within block boundaries.
+\end{frame}
+
+\begin{frame}[fragile]{Named Critical Sections}
+  Multiple named critical sections prevent unnecessary waiting.
+
+  \textbf{Syntax:}
+  \begin{verbatim}
+  #pragma omp critical(name)
+  {
+    // named critical section
+  }
+  \end{verbatim}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel
+{
+  #pragma omp critical(update_sum)
+  {
+    sum += compute_sum();
+  }
+
+  #pragma omp critical(update_max)
+  {
+    max_val = max(max_val, compute_val());
+  }
+}
+  \end{lstlisting}
+
+  Different named critical regions do not block each other.
+\end{frame}
+
+\begin{frame}[fragile]{Atomic Operations (\texttt{atomic})}
+  Purpose:
+  Enforces atomicity of a single memory operation.
+
+  Syntax:
+  \begin{verbatim}
+  #pragma omp atomic
+    expression;
+  \end{verbatim}
+
+  Supported operations: \texttt{+, -, *, /, \&, |, \^, ++, --}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel for
+for(int i = 0; i < N; i++) {
+  #pragma omp atomic
+  count += array[i];
+}
+  \end{lstlisting}
+
+  It is more efficient than \texttt{critical} for simple arithmetic.
+\end{frame}
+
+\begin{frame}{\texttt{critical} vs. \texttt{atomic}}
+  Key differences between these synchronization methods:
+
+  \begin{itemize}
+    \item Critical Sections:
+    \begin{itemize}
+      \item Allows arbitrary blocks of code.
+      \item More general-purpose, but potentially slower due to locking overhead.
+    \end{itemize}
+
+    \item Atomic Operations:
+    \begin{itemize}
+      \item Limited to single, simple memory operations.
+      \item Faster, uses hardware-level instructions.
+    \end{itemize}
+  \end{itemize}
+
+  Use \texttt{atomic} for simple operations, \texttt{critical} for more complex sections.
+\end{frame}
+
+\section{OpenMP functions}
+\begin{frame}[fragile]{OpenMP Functions: Thread Management}
+  Control and query the number of threads.
+
+  Commonly used functions:
+  \begin{itemize}
+    \item \texttt{omp\_set\_num\_threads(int n)}
+    \item \texttt{omp\_get\_num\_threads()}
+    \item \texttt{omp\_get\_thread\_num()}
+    \item \texttt{omp\_get\_max\_threads()}
+  \end{itemize}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+omp_set_num_threads(4);
+#pragma omp parallel
+{
+  int tid = omp_get_thread_num();
+  printf("Hello from thread %d\n", tid);
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{OpenMP Locks}
+  Purpose:
+  Provide explicit, fine-grained control of synchronization for critical regions.
+
+  API:
+  \begin{itemize}
+    \item \texttt{omp\_init\_lock()} — Initializes a lock
+    \item \texttt{omp\_set\_lock()} — Locks (blocks if unavailable)
+    \item \texttt{omp\_unset\_lock()} — Releases a lock
+    \item \texttt{omp\_destroy\_lock()} — Frees lock resources
+  \end{itemize}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+omp_lock_t lock;
+omp_init_lock(&lock);
+
+#pragma omp parallel for
+for(int i = 0; i < N; i++) {
+    omp_set_lock(&lock);
+      sum += compute(i);
+    omp_unset_lock(&lock);
+}
+
+omp_destroy_lock(&lock);
+  \end{lstlisting}
+
+  Explicit locking provides precise synchronization control.
+\end{frame}
+
+\begin{frame}[fragile]{OpenMP Functions: Timing}
+  Useful functions for measuring execution time:
+
+  \begin{itemize}
+    \item \texttt{omp\_get\_wtime()} — returns current time in seconds.
+    \item \texttt{omp\_get\_wtick()} — precision of timer.
+  \end{itemize}
+
+  Example:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+double start = omp_get_wtime();
+
+#pragma omp parallel for
+for(int i = 0; i < N; i++) {
+  heavy_computation(i);
+}
+
+double end = omp_get_wtime();
+printf("Elapsed time: %f seconds\n", end-start);
+  \end{lstlisting}
+\end{frame}
+
+\section{Environment variables}
+
+\begin{frame}{Environment Variables in OpenMP}
+Environment variables control OpenMP runtime behavior without recompilation.
+
+Common environment variables include:
+  \begin{itemize}
+    \item \texttt{OMP\_NUM\_THREADS}
+    \item \texttt{OMP\_SCHEDULE}
+    \item \texttt{OMP\_DYNAMIC}
+    \item \texttt{OMP\_NESTED}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{OMP\_NUM\_THREADS}}
+  Specifies the default number of threads.
+
+  Example usage:
+  \begin{verbatim}
+    export OMP_NUM_THREADS=8
+    ./my_program
+  \end{verbatim}
+
+  Overrides default or explicitly set number of threads within code unless set otherwise by \texttt{num\_threads} clause.
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{OMP\_SCHEDULE}}
+  Sets default scheduling policy for loops with the \texttt{schedule(runtime)} clause.
+
+  Syntax:
+  \begin{verbatim}
+    export OMP_SCHEDULE="type,chunk"
+  \end{verbatim}
+
+  Example:
+  \begin{verbatim}
+    export OMP_SCHEDULE="dynamic,4"
+    ./my_program
+  \end{verbatim}
+
+  Affects loops declared as:
+  \begin{verbatim}
+    #pragma omp parallel for schedule(runtime)
+  \end{verbatim}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{OMP\_DYNAMIC} and \texttt{OMP\_NESTED}}
+  Enables dynamic thread adjustment (true/false).
+
+  Example:
+  \begin{verbatim}
+    export OMP_DYNAMIC=true
+  \end{verbatim}
+\end{frame}
+
+
+\begin{frame}[fragile]{\texttt{OMP\_DYNAMIC} and \texttt{OMP\_NESTED}}
+  Allows nested parallelism (true/false).
+
+  Example:
+  \begin{verbatim}
+    export OMP_NESTED=true
+  \end{verbatim}
+
+  Nested parallel regions:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#pragma omp parallel num_threads(2)
+{
+  #pragma omp parallel num_threads(2)
+  {
+    // Nested region, total 4 threads
+  }
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}
+  \centering
+  \Huge{Thank You!}
+\end{frame}
+
+\begin{frame}{References}
+  \begin{itemize}
+    \item OpenMP Official Specification: \url{https://www.openmp.org/specifications/}
+    \item OpenMP Reference Guides: \url{https://www.openmp.org/resources/refguides/}
+  \end{itemize}
+\end{frame}
+
+\end{document}
