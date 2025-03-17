@@ -42,6 +42,7 @@ jobs:
           ${{ runner.os }}-brew-
     - name: Setup environment
       run: |
+        brew update
         brew install --cask mactex
     - name: Build
       run: |
