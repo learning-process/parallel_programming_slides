@@ -1,0 +1,573 @@
+\documentclass{beamer}
+
+% Theme choice
+\usetheme{Madrid}
+
+% Optional packages
+\usepackage{graphicx} % For including images
+\usepackage{amsmath}  % For math symbols and formulas
+\usepackage{hyperref} % For hyperlinks
+\usepackage{tikz}     % For charts
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[T1]{fontenc}
+
+\lstdefinestyle{CStyle}{
+  language=C,                    % Set the language to C
+  basicstyle=\ttfamily\footnotesize\linespread{0.9}\tiny, % Set font style and size
+  keywordstyle=\color{blue},      % Color of keywords
+  commentstyle=\color{gray},      % Color of comments
+  stringstyle=\color{red},        % Color of strings
+  showstringspaces=false,         % Do not mark spaces in strings
+  breaklines=true,                % Enable line breaks at appropriate places
+  breakatwhitespace=false,        % Break lines at any character, not just whitespace
+  numbers=left,                   % Show line numbers on the left
+  numberstyle=\tiny\color{gray},  % Style for line numbers
+  tabsize=4,                      % Set tab width
+  keepspaces=true,                % Keep indentation spaces
+  frame=single,                   % Add a border around the code
+  aboveskip=0pt,                  % Reduce space above the code block
+  belowskip=0pt,                   % Reduce space below the code block
+  xleftmargin=7.5pt,                      % Add left padding (approx. 2.8mm or 10px)
+  xrightmargin=15pt,                      % Add left padding (approx. 2.8mm or 10px)
+}
+
+% Title, author, date, and institute (optional)
+\title[Parallel Programming. TBB]{Parallel Programming course. TBB}
+\author{Obolenskiy Arseniy, Nesterov Alexander}
+\institute{Nizhny Novgorod State University}
+
+\date{\today} % or \date{Month Day, Year}
+
+% Redefine the footline to display both the short title and the university name
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.45\paperwidth,ht=2.5ex,dp=1ex,leftskip=1em,center]{author in head/foot}%
+        \usebeamerfont{author in head/foot}\insertshortinstitute % Displays the university name
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.45\paperwidth,ht=2.5ex,dp=1ex,leftskip=1em,center]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\insertshorttitle % Displays the short title
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.1\paperwidth,ht=2.5ex,dp=1ex,rightskip=1em,center]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\insertframenumber{} / \inserttotalframenumber
+    \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\begin{document}
+
+% Title slide
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Table of Contents (optional)
+\begin{frame}{Contents}
+  \tableofcontents
+\end{frame}
+
+\section{Introduction to TBB}
+\begin{frame}{OpenMP recap}
+  \begin{itemize}
+    \item OpenMP is an open standard for shared-memory parallel programming
+    \item It uses compiler directives (\texttt{\#pragma omp}), runtime functions, and environment variables
+    \item Simplifies parallel loops and regions for multi-threaded execution
+    \item Serves as a baseline for comparing other parallel models
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{OpenMP vs TBB}
+  \begin{itemize}
+    \item OpenMP:
+      \begin{itemize}
+        \item Open standard (not a library) that defines a set of compiler directives, runtime library routines, and environment variables for parallel programming
+        \item Directive-based, integrated into the compiler (specific implementation is don on the compiler side)
+        \item Implements thread-level parallelism
+      \end{itemize}
+    \item TBB (Threading Building Blocks):
+      \begin{itemize}
+        \item C++ template library
+        \item Uses task-based parallelism with work-stealing scheduling
+        \item Provides higher-level constructs and generic parallel patterns
+      \end{itemize}
+    \item TBB enables more flexible and fine-grained parallelism compared to OpenMP
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Pros and Cons of TBB}
+  \begin{columns}
+    \column{0.5\textwidth}
+      Pros
+      \begin{itemize}
+        \item Task-based parallelism with dynamic work-stealing
+        \item High-level constructs simplify parallel code
+        \item Seamless integration with modern C++ and STL
+        \item Scalable and efficient for fine-grained tasks
+        \item Portable across different platforms
+      \end{itemize}
+    \column{0.5\textwidth}
+      Cons
+      \begin{itemize}
+        \item Steeper learning curve compared to directive-based models
+        \item Less intuitive for simple loop parallelism
+        \item Threading issues debugging sometimes can be challenging due to dynamic scheduling
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{TBB history}
+  \begin{itemize}
+    \item Originally developed by Intel to simplify parallel programming in C++
+    \item Evolved into an open-source library and later integrated into Intel oneAPI
+    \item Widely adopted in industry and academia for scalable task-based parallelism
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{TBB history timeline}
+  \begin{itemize}
+    \item Early 2000s: Conceptual groundwork for task-based parallelism laid at Intel
+    \item 2006: Initial development of TBB begins for internal projects
+    \item 2007: First public release of Intel Threading Building Blocks
+    \item 2010: Major updates introduce improved C++ integration and performance enhancements
+    \item 2017: TBB is open-sourced, fostering community contributions
+    \item 2019: Integration into Intel oneAPI, expanding its cross-platform reach
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{TBB fundamentals}
+  \begin{itemize}
+    \item A C++ library for task-based parallelism
+    \item Abstracts low-level thread management and uses a work-stealing scheduler
+    \item Provides high-level constructs (e.g., \texttt{tbb::parallel\_for}, \texttt{tbb::parallel\_reduce}) that simplify parallel code implementation
+    \item Promotes writing scalable code by focusing on tasks rather than threads
+  \end{itemize}
+\end{frame}
+
+\section{TBB tasks scheduler}
+
+\begin{frame}{Work-stealing dynamic scheduler}
+  A work-stealing dynamic scheduler in TBB is a type of scheduling algorithm designed to efficiently balance the workload across multiple threads in a parallel program
+
+  The idea: each thread maintains its own queue of tasks. When a thread finishes its own work and becomes idle, instead of waiting, it tries to "steal" tasks from other threads queues to stay productive. This helps to dynamically balance the workload and utilize CPU resources effectively
+\end{frame}
+
+\begin{frame}{How TBB Implements Work Stealing}
+  \begin{itemize}
+    \item Local Queues:
+      \begin{itemize}
+        \item Each worker thread maintains its own local task queue (a double-ended queue)
+        \item New tasks are added to the bottom (LIFO) for cache-friendly, nested task execution
+      \end{itemize}
+    \item Stealing:
+      \begin{itemize}
+        \item When a thread's local queue is empty, it becomes a "thief"
+        \item The thief randomly selects a victim thread and steals a task from the top (FIFO) of its deque
+      \end{itemize}
+    \item Minimizing Contention:
+      \begin{itemize}
+        \item Most operations are thread-local, avoiding the need for synchronization
+        \item Stealing operations are synchronized but occur infrequently and in a randomized manner
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\section{TBB utility functions}
+
+\begin{frame}[fragile]{Max thread number in TBB}
+  \begin{itemize}
+    \item TBB uses a global task scheduler that automatically manages worker threads.
+    \item You can limit the maximum number of threads using \texttt{tbb::global\_control}.
+    \item This is useful to match hardware capabilities or limit resource usage.
+    \item Example: Limit TBB to use only a specific number of threads.
+  \end{itemize}
+
+  \vspace{0.5em}
+
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/global_control.h"
+#include "tbb/parallel_for.h"
+
+int main() {
+  // Limit TBB to use only 4 threads
+  tbb::global_control gc(tbb::global_control::max_allowed_parallelism, 4);
+
+  // Example parallel work
+  tbb::parallel_for(0, N, [&](int i){
+      // Compute something for index i
+  });
+
+  return 0;
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{TBB arenas: Isolated execution contexts}
+  \begin{itemize}
+    \item TBB arenas let you create isolated execution contexts with custom concurrency levels.
+    \item They allow you to control resource usage and isolate parallel work from the global scheduler.
+    \item Use \texttt{tbb::task\_arena} to define a pool of worker threads dedicated to a specific section of code.
+    \item Execute tasks within an arena using the \texttt{execute()} method.
+  \end{itemize}
+
+  \vspace{0.5em}
+
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/task_arena.h"
+#include "tbb/parallel_for.h"
+
+int main() {
+  // Create a task arena with a maximum of 2 threads
+  tbb::task_arena arena(2);
+
+  arena.execute([&]{
+    tbb::parallel_for(0, N, [&](int i){
+      // Work executed within the arena
+      process(i);
+    });
+  });
+
+  return 0;
+}
+  \end{lstlisting}
+\end{frame}
+
+\section{TBB parallel execution constructs}
+
+\begin{frame}{TBB core parallel execution constructs}
+  \begin{itemize}
+    \item \texttt{tbb::parallel\_for}: Distributes loop iterations among tasks
+    \item \texttt{tbb::parallel\_reduce}: Performs reductions over a range
+    \item \texttt{tbb::parallel\_scan}: Computes prefix sums in parallel
+    \item \texttt{tbb::parallel\_invoke} for tasks: Executes independent functions concurrently
+    \item \texttt{tbb::task\_group}: For more convenient parallel task management
+    \item Concurrent containers and synchronization primitives
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{tbb::blocked\_range}
+  \begin{itemize}
+    \item Purpose: Defines a range of values to be processed in parallel
+    \item Usage: Commonly used with \texttt{tbb::parallel\_for} and \texttt{parallel\_reduce}
+    \item Range Specification: Represents a half-open interval \([begin, end)\) and supports an optional grain size
+    \item Grain Size:
+      \begin{itemize}
+        \item Specifies the minimum number of iterations in a subrange.
+        \item A small grain size increases task granularity, enhancing load balancing but may add overhead.
+        \item A large grain size reduces overhead but may cause imbalance if work per iteration varies.
+      \end{itemize}
+  \end{itemize}
+
+  \vspace{0.5em}
+
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/blocked_range.h"
+
+// Example: process a range of indices [0, N)
+tbb::blocked_range<size_t> range(0, N, grain_size);
+
+tbb::parallel_for(range, [&](const tbb::blocked_range<size_t>& r) {
+  for (size_t i = r.begin(); i != r.end(); ++i) {
+    process(i);
+  }
+});
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Parallel loops (\texttt{tbb::parallel\_for})}
+  \begin{itemize}
+    \item Splits a loop range into subranges executed in parallel
+    \item Uses a blocked range to define the iteration space
+  \end{itemize}
+  \vspace{0.5em}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/parallel_for.h"
+#include "tbb/blocked_range.h"
+#include <vector>
+
+std::vector<int> data(N);
+
+tbb::parallel_for(tbb::blocked_range<size_t>(0, N),
+  [&](const tbb::blocked_range<size_t>& r) {
+    for(size_t i = r.begin(); i != r.end(); ++i) {
+      data[i] = compute(i);
+    }
+  });
+  \end{lstlisting}
+
+  Or with range-based loop:
+
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/parallel_for.h"
+#include "tbb/blocked_range.h"
+#include <vector>
+
+std::vector<int> data(N);
+
+tbb::parallel_for(tbb::blocked_range<size_t>(0, N),
+  [&](const tbb::blocked_range<size_t>& r) {
+    for(auto i : r) {
+      data[i] = compute(i);
+    }
+  });
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Static scheduling with \texttt{static\_partitioner}}
+  \begin{itemize}
+    \item TBB uses dynamic work-stealing by default
+    \item Use \texttt{tbb::static\_partitioner} to enforce a static division of the iteration space
+    \item This partitioner divides work evenly at the start, which can reduce overhead for regular, balanced workloads
+  \end{itemize}
+
+  \vspace{0.5em}
+
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/parallel_for.h"
+#include "tbb/blocked_range.h"
+#include "tbb/static_partitioner.h"
+#include <vector>
+
+std::vector<int> data(N);
+
+tbb::parallel_for(
+  tbb::blocked_range<size_t>(0, N),
+  [&](const tbb::blocked_range<size_t>& r) {
+    for(auto i : r) {
+      data[i] = compute(i);
+    }
+  },
+  tbb::static_partitioner()  // Use static partitioning
+);
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Parallel reduction (\texttt{tbb::parallel\_reduce})}
+  \begin{itemize}
+    \item Performs reduction (e.g., sum, max) across a range
+    \item Divides the work and then combines partial results
+  \end{itemize}
+  \vspace{0.5em}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/parallel_reduce.h"
+#include "tbb/blocked_range.h"
+#include <vector>
+#include <functional>
+
+std::vector<int> array(N);
+
+int total = tbb::parallel_reduce(
+  tbb::blocked_range<size_t>(0, N),
+  0,
+  [&](const tbb::blocked_range<size_t>& r, int local_sum) -> int {
+    for(size_t i = r.begin(); i != r.end(); ++i)
+      local_sum += array[i];
+    return local_sum;
+  },
+  std::plus<int>());
+  \end{lstlisting}
+
+  {\tiny
+    Supported operations:
+    \begin{itemize}
+      \item Sum: \texttt{a + b}
+      \item Product: \texttt{a * b}
+      \item Minimum: \texttt{std::min(a, b)}
+      \item Maximum: \texttt{std::max(a, b)}
+      \item Logical AND / OR: \texttt{a \&\& b} and \texttt{a || b}
+      \item Custom operations: e.g., merging data structures or combining histograms
+    \end{itemize}
+  }
+\end{frame}
+
+\begin{frame}[fragile]{TBB tasks}
+  \begin{itemize}
+    \item TBB tasks represent independent units of work
+    \item They allow fine-grained parallelism and dynamic scheduling
+  \end{itemize}
+  \vspace{0.5em}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/parallel_invoke.h"
+
+tbb::parallel_invoke(
+    [](){ compute_task_A(); },
+    [](){ compute_task_B(); },
+    [](){ compute_task_C(); }
+);
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{TBB task groups}
+  \begin{itemize}
+    \item The \texttt{task\_group} interface simplifies tasks management
+    \item It allows to launch and wait for a bunch of tasks
+  \end{itemize}
+  \vspace{0.5em}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/task_group.h"
+
+void compute() {
+  tbb::task_group tg;
+  tg.run([](){ compute_task_A(); });
+  tg.run([](){ compute_task_B(); });
+  tg.wait();  // Wait for both tasks to complete
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Scan algorithm (\texttt{tbb::parallel\_scan})}
+  \begin{itemize}
+    \item Useful for parallel prefix sum (scan) operations
+    \item Supports both inclusive and exclusive scans
+  \end{itemize}
+  \vspace{0.5em}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/parallel_scan.h"
+#include "tbb/blocked_range.h"
+#include <vector>
+#include <numeric>
+
+std::vector<int> data(N);
+int initial = 0;
+
+tbb::parallel_scan(
+  tbb::blocked_range<size_t>(0, N),
+  initial,
+  [&](const tbb::blocked_range<size_t>& r, int running_total, bool is_final_scan) -> int {
+    for(size_t i = r.begin(); i != r.end(); ++i) {
+      running_total += data[i];
+      if(is_final_scan)
+        data[i] = running_total;
+    }
+    return running_total;
+  },
+  std::plus<int>());
+  \end{lstlisting}
+\end{frame}
+
+\section{Synchronization}
+
+\begin{frame}{Synchronization}
+  \begin{itemize}
+    \item TBB provides synchronization primitives such as:
+      \begin{itemize}
+        \item \texttt{tbb::mutex} and \texttt{tbb::spin\_mutex} for mutual exclusion
+        \item Atomic operations and concurrent containers for lock-free data access
+      \end{itemize}
+    \item The runtime work-stealing scheduler minimizes contention by dynamically balancing tasks
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Mutex (\texttt{tbb::mutex})}
+  \begin{itemize}
+    \item Provides mutual exclusion for protecting shared data
+    \item Uses \texttt{RAII} (resource acquisition is initialization paradigm) with \texttt{scoped\_lock} to automatically manage locking
+    \item Lightweight and efficient for fine-grained synchronization
+  \end{itemize}
+
+  \vspace{0.5em}
+
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include "tbb/mutex.h"
+#include <vector>
+
+tbb::mutex m;
+std::vector<int> shared_data;
+
+void update_data(int value) {
+  tbb::mutex::scoped_lock lock(m); // Lock acquired
+  shared_data.push_back(value);
+  // Lock released automatically when 'lock' goes out of scope
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}{What about the barrier in TBB?}
+  \begin{itemize}
+    \item Unlike OpenMP, TBB does not provide an explicit barrier construct
+    \item Implicit Synchronization:
+      \begin{itemize}
+        \item TBB parallel algorithms (e.g., \texttt{tbb::parallel\_for}, \texttt{tbb::parallel\_reduce}) return only after all tasks are complete
+        \item This behavior naturally synchronizes work without needing an explicit barrier
+      \end{itemize}
+    \item Task Group Synchronization:
+      \begin{itemize}
+        \item When using \texttt{tbb::task\_group}, call \texttt{wait()} to ensure all spawned tasks have finished
+      \end{itemize}
+    \item Design Philosophy: TBB's task-based model minimizes the need for explicit synchronization, improving scalability and reducing overhead
+  \end{itemize}
+\end{frame}
+
+\section{Brief overview of asvanced features}
+
+\begin{frame}{Brief advanced TBB features overview}
+  \begin{itemize}
+    \item Pipelines and Flow Graphs:
+      \begin{itemize}
+        \item \texttt{tbb::flow::graph}: Build complex workflows using nodes
+        \item Example: Create a pipeline that processes data through \texttt{function\_node}, \texttt{buffer\_node}, and \texttt{join\_node} to orchestrate task dependencies
+      \end{itemize}
+    \item Thread-safe data structures
+      \begin{itemize}
+        \item \texttt{tbb::concurrent\_vector}: Dynamic array with concurrent push-backs
+        \item \texttt{tbb::concurrent\_hash\_map}: High-performance hash table for concurrent access
+        \item \texttt{tbb::concurrent\_queue}: Lock-free queue
+        \item \texttt{tbb::concurrent\_unordered\_map}: Unordered map optimized for parallel workloads
+      \end{itemize}
+      \item Scalable Memory Allocation optimized for parallel environments:
+      \begin{itemize}
+        \item \texttt{tbb::scalable\_allocator}: Can be used with STL containers to reduce memory contention
+        \item Example: Using \texttt{tbb::scalable\_allocator} with a \texttt{std::vector} for improved allocation performance in multi-threaded scenarios
+      \end{itemize}
+    \item and others\dots
+  \end{itemize}
+\end{frame}
+
+\section{Performance comparison}
+
+\begin{frame}{Performance: TBB vs OpenMP}
+  \begin{itemize}
+    \item Performance factors:
+      \begin{itemize}
+        \item TBB dynamic scheduling may introduce overhead for fine-grained tasks
+        \item OpenMP static scheduling can be more efficient for uniform workloads
+      \end{itemize}
+    \item Scalability and load balancing:
+      \begin{itemize}
+        \item TBB deals significantly better with unbalanced workloads with its work-stealing scheduler
+        \item OpenMP may perform better in highly regular, compute-intensive loops
+      \end{itemize}
+    \item Optimization and tuning:
+      \begin{itemize}
+        \item Both TBB and OpenMP are highly optimized
+        \item Real-world performance is case-dependent: benchmarking on target hardware and specific tasks is essential
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \centering
+  \Huge{Thank You!}
+\end{frame}
+
+\begin{frame}{References}
+  \begin{itemize}
+    \item oneAPI Threading Building Blocks GitHub repository: \url{https://github.com/uxlfoundation/oneTBB}
+    \item oneAPI Threading Building Blocks (oneTBB) documentation: \url{oneAPI Threading Building Blocks (oneTBB)}
+    \item CppCon 2015: Pablo Halpern "Work Stealing": \url{https://www.youtube.com/watch?v=iLHNF7SgVN4}
+    \item Pushing the limits of work-stealing: \url{https://community.intel.com/legacyfs/online/drupal_files/managed/9d/48/ConfAnton-Pushing-the-limits-of-work-stealing-approved.pdf}
+  \end{itemize}
+\end{frame}
+
+\end{document}
