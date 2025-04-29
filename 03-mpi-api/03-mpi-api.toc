@@ -1,4 +1,4 @@
 \beamer@sectionintoc {1}{Boost.MPI}{3}{0}{1}
-\beamer@sectionintoc {2}{Advanced Send/Receive API}{5}{0}{2}
-\beamer@sectionintoc {3}{Synchronization}{8}{0}{3}
-\beamer@sectionintoc {4}{Collective operations}{10}{0}{4}
+\beamer@sectionintoc {2}{Advanced Send/Receive API}{6}{0}{2}
+\beamer@sectionintoc {3}{Synchronization}{10}{0}{3}
+\beamer@sectionintoc {4}{Collective operations}{13}{0}{4}

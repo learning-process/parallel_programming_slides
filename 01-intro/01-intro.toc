@@ -1,4 +1,4 @@
 \beamer@sectionintoc {1}{Introduction to MPI}{3}{0}{1}
-\beamer@sectionintoc {2}{"Hello, World" in MPI}{5}{0}{2}
-\beamer@sectionintoc {3}{Brief API calls overview}{8}{0}{3}
-\beamer@sectionintoc {4}{MPI data distribution}{9}{0}{4}
+\beamer@sectionintoc {2}{"Hello, World" in MPI}{6}{0}{2}
+\beamer@sectionintoc {3}{Brief API calls overview}{10}{0}{3}
+\beamer@sectionintoc {4}{MPI data distribution}{12}{0}{4}

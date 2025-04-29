@@ -1,7 +1,7 @@
 \beamer@sectionintoc {1}{Introduction to OpenMP}{3}{0}{1}
-\beamer@sectionintoc {2}{Hello World}{5}{0}{2}
-\beamer@sectionintoc {3}{Basic OpenMP Features}{6}{0}{3}
-\beamer@sectionintoc {4}{Compiler Directives and Clauses}{8}{0}{4}
-\beamer@sectionintoc {5}{Synchronization and Data Sharing}{17}{0}{5}
-\beamer@sectionintoc {6}{OpenMP functions}{23}{0}{6}
-\beamer@sectionintoc {7}{Environment variables}{26}{0}{7}
+\beamer@sectionintoc {2}{Hello World}{6}{0}{2}
+\beamer@sectionintoc {3}{Basic OpenMP Features}{8}{0}{3}
+\beamer@sectionintoc {4}{Compiler Directives and Clauses}{11}{0}{4}
+\beamer@sectionintoc {5}{Synchronization and Data Sharing}{21}{0}{5}
+\beamer@sectionintoc {6}{OpenMP functions}{28}{0}{6}
+\beamer@sectionintoc {7}{Environment variables}{32}{0}{7}
