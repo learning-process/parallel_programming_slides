@@ -1,0 +1,578 @@
+\documentclass{beamer}
+
+% Theme choice
+\usetheme{Madrid}
+
+% Optional packages
+\usepackage{graphicx} % For including images
+\usepackage{amsmath}  % For math symbols and formulas
+\usepackage{hyperref} % For hyperlinks
+\usepackage{tikz}     % For charts
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[T1]{fontenc}
+
+\lstdefinestyle{CStyle}{
+  language=C,                    % Set the language to C
+  basicstyle=\ttfamily\footnotesize\linespread{0.9}\tiny, % Set font style and size
+  keywordstyle=\color{blue},      % Color of keywords
+  commentstyle=\color{gray},      % Color of comments
+  stringstyle=\color{red},        % Color of strings
+  showstringspaces=false,         % Do not mark spaces in strings
+  breaklines=true,                % Enable line breaks at appropriate places
+  breakatwhitespace=false,        % Break lines at any character, not just whitespace
+  numbers=left,                   % Show line numbers on the left
+  numberstyle=\tiny\color{gray},  % Style for line numbers
+  tabsize=4,                      % Set tab width
+  keepspaces=true,                % Keep indentation spaces
+  frame=single,                   % Add a border around the code
+  aboveskip=0pt,                  % Reduce space above the code block
+  belowskip=0pt,                  % Reduce space below the code block
+  xleftmargin=7.5pt,              % Add left padding (approx. 2.8mm or 10px)
+  xrightmargin=15pt,              % Add left padding (approx. 2.8mm or 10px)
+}
+
+\AtBeginSection[]{
+  \begin{frame}
+    \centering
+    \Huge\insertsection
+  \end{frame}
+}
+
+% Title, author, date, and institute (optional)
+\title[Parallel Programming. C++ threading]{Parallel Programming course. C++ threading}
+\author{Obolenskiy Arseniy, Nesterov Alexander}
+\institute{Nizhny Novgorod State University}
+
+\date{\today} % or \date{Month Day, Year}
+
+% Redefine the footline to display both the short title and the university name
+\setbeamertemplate{footline}{
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.45\paperwidth,ht=2.5ex,dp=1ex,leftskip=1em,center]{author in head/foot}%
+        \usebeamerfont{author in head/foot}\insertshortinstitute % Displays the university name
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.45\paperwidth,ht=2.5ex,dp=1ex,leftskip=1em,center]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\insertshorttitle % Displays the short title
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.1\paperwidth,ht=2.5ex,dp=1ex,rightskip=1em,center]{author in head/foot}%
+      \usebeamerfont{author in head/foot}\insertframenumber{} / \inserttotalframenumber
+    \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\begin{document}
+
+% Title slide
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Table of Contents (optional)
+\begin{frame}{Contents}
+  \tableofcontents
+\end{frame}
+
+\section{Introduction to C++ threading API}
+
+\begin{frame}{What is \texttt{std::thread}?}
+  \begin{itemize}
+    \item Part of the C++11 thread support library (\texttt{<thread>}, \texttt{<mutex>}, etc.)
+    \item Low-level, manual thread creation and management
+    \item Relies on the OS native threads under the hood
+    \item Provides:
+      \begin{itemize}
+        \item \texttt{std::thread} for launching threads
+        \item Synchronization primitives (\texttt{std::mutex}, \texttt{std::condition\_variable}, \texttt{std::atomic})
+        \item Utilities for futures and promises (\texttt{std::future}, \texttt{std::promise})
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Threading before C++11}
+  \begin{itemize}
+    \item POSIX threads (\texttt{pthread}): C-based API, widely used on Unix-like systems
+    \item Windows threads: Win32 API with \texttt{CreateThread}, \texttt{CRITICAL\_SECTION}, and events
+    \item External libraries (e.g. Boost.Thread)
+  \end{itemize}
+  Challenges and inconveniences:
+  \begin{itemize}
+    \item non-standard APIs (towards C++)
+    \item platform dependent APIs
+    \item verbose initialization boilerplate
+    \item manual resource management
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{\texttt{std::thread} history}
+  \begin{itemize}
+    \item C++11 (2011): Introduced \texttt{std::thread}, \texttt{std::mutex}, \texttt{std::future}, etc.
+    \item C++14/17/20: Incremental improvements (e.g., \texttt{std::hardware\_constructive\_interference\_size})
+    \item Widely adopted as the base for custom thread pools and concurrency utilities
+    \item Now the foundation of many higher-level C++ concurrency libraries
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{OpenMP vs TBB vs \texttt{std::thread}}
+  \begin{itemize}
+    \item \textbf{OpenMP}
+      \begin{itemize}
+        \item Directive-based, compiler-driven shared-memory parallelism
+        \item Simple loop and region parallelism
+      \end{itemize}
+    \item \textbf{TBB}
+      \begin{itemize}
+        \item Template library, task-based parallelism with work-stealing
+        \item High-level parallel patterns (\texttt{tbb::parallel\_for}, \texttt{tbb::parallel\_reduce}, etc.)
+      \end{itemize}
+    \item \textbf{std::thread}
+      \begin{itemize}
+        \item Low-level manual thread API
+        \item Full control over thread lifetime, but more boilerplate
+        \item Foundation for building custom task systems or thread pools
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Pros and cons of \texttt{std::thread}}
+  \begin{columns}
+    \column{0.5\textwidth}
+      \textbf{Pros}
+      \begin{itemize}
+        \item Complete control over thread creation and destruction
+        \item No hidden scheduler—behavior is predictable
+        \item Part of standard C++, portable across platforms
+        \item Good for learning fundamentals
+      \end{itemize}
+    \column{0.5\textwidth}
+      \textbf{Cons}
+      \begin{itemize}
+        \item Manual management—risk of leaks, detach/join errors
+        \item Verbose boilerplate for synchronization
+        \item No built-in task scheduling or work-stealing
+        \item Harder to scale and tune compared to higher-level APIs
+      \end{itemize}
+  \end{columns}
+\end{frame}
+
+\section{C++ STL threading API (\texttt{std::thread}, \texttt{std::jthread})}
+
+\begin{frame}{\texttt{std::thread} details}
+  \begin{itemize}
+    \item Constructors:
+      \begin{itemize}
+        \item \texttt{std::thread(callable, args...)}: starts a new thread executing \texttt{callable} with \texttt{args}
+        \item Default constructor: creates a thread object without an associated thread
+      \end{itemize}
+    \item Member functions:
+      \begin{itemize}
+        \item \texttt{join()}: blocks until the thread finishes execution
+        \item \texttt{detach()}: detaches the thread to run independently
+        \item \texttt{joinable()}: checks whether the thread can be joined
+        \item \texttt{get\_id()}: returns the \texttt{std::thread::id} of the thread
+      \end{itemize}
+    \item Properties:
+      \begin{itemize}
+        \item Move-only: supports move construction and assignment; copy operations are deleted
+        \item Static \texttt{hardware\_concurrency()}: returns the number of concurrent threads supported
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Creating and launching threads}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include <thread>
+#include <iostream>
+
+void worker(int id) {
+  std::cout << "Worker " << id << " running\n";
+}
+
+int main() {
+  // Launch two threads with argument
+  std::thread t1(worker, 1);
+  std::thread t2(worker, 2);
+
+  // Wait for them to finish
+  if (t1.joinable()) {
+    t1.join();
+  }
+  if (t2.joinable()) {
+    t2.join();
+  }
+
+  return 0;
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item Construct \texttt{std::thread} with a callable + optional args
+    \item Must call \texttt{join()} or \texttt{detach()} before destruction
+    \item Threads are move-only: no copy construction/assignment
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Managing thread lifetime}
+  \begin{itemize}
+    \item \texttt{join()}: waits for thread completion
+    \item \texttt{detach()}: allows thread to run independently (daemon-like)
+  \end{itemize}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+std::thread t(worker);
+// ...
+if (t.joinable()) {
+    t.join();
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item \texttt{joinable()}: check if thread can be joined
+  \end{itemize}
+  \begin{itemize}
+    \item Detached threads continue after \texttt{main}—dangerous if resources go out of scope
+    \item Always ensure each thread is either joined or detached
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Passing arguments to threads}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include <thread>
+#include <string>
+#include <iostream>
+
+void greet(const std::string &name) {
+  std::cout << "Hello, " << name << "!\n";
+}
+
+int main() {
+  std::string user = "Alice";
+  // Pass by reference: use std::ref
+  std::thread t(greet, std::ref(user));
+  t.join();
+  return 0;
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item By default, args are copied into the new thread
+    \item Use \texttt{std::ref()} to pass references
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Querying hardware concurrency capabilities}
+  \begin{itemize}
+    \item \texttt{std::thread::hardware\_concurrency()} returns the number of supported threads
+    \item May potentially return 0
+  \end{itemize}
+  \texttt{unsigned n = std::thread::hardware\_concurrency();}
+  Usage example: to size thread pools or partition work
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{std::jthread}}
+  \begin{itemize}
+    \item Introduced in C++20 as a safer and more convenient alternative to \texttt{std::thread}.
+    \item Automatically joins upon destruction, reducing the risk of detached threads.
+    \item Supports cooperative cancellation via \texttt{std::stop\_token}.
+  \end{itemize}
+  Example usage:
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include <iostream>
+#include <thread>
+#include <chrono>
+
+void task(std::stop_token stoken) {
+  while (!stoken.stop_requested()) {
+    std::cout << "Working...\n";
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  std::cout << "Task stopping.\n";
+}
+
+int main() {
+  std::jthread jt(task);
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  // Request stop automatically during destruction or manually via jt.request_stop();
+  return 0;
+}
+  \end{lstlisting}
+\end{frame}
+
+\section{\texttt{std::future}, \texttt{std::promise} and \texttt{std::async}}
+
+\begin{frame}{Future/Promise and Async Execution}
+  \begin{itemize}
+    \item Future and promise provide a mechanism for asynchronous communication between threads
+    \item A promise allows one thread to set a value or report an error
+    \item The associated future retrieves the value, waiting if necessary
+    \item std::async simplifies launching asynchronous tasks without explicit thread management
+    \item These features promote decoupling of computation and enhance concurrency control
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{std::future} and \texttt{std::promise}}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include <future>
+#include <iostream>
+
+int compute() {
+  int result;
+  ...  // heavy computation
+  return result;
+}
+
+int main() {
+  std::promise<int> prom;
+  std::future<int> fut = prom.get_future();
+
+  std::thread t([&prom]{
+      prom.set_value(compute());
+  });
+
+  std::cout << "Result: " << fut.get() << "\n";
+  t.join();
+  return 0;
+}
+  \end{lstlisting}
+
+  \texttt{std::promise} sets a value (or failure)
+
+  \texttt{std::future} retrieves it on demand
+\end{frame}
+
+\begin{frame}[fragile]{Using \texttt{std::async}}
+  \begin{itemize}
+    \item Launches tasks asynchronously and returns a \texttt{std::future}
+    \item Can run immediately in a new thread or be deferred until needed
+    \item Simplifies asynchronous programming by handling thread management
+  \end{itemize}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include <future>
+#include <iostream>
+
+int computeSquare(int x) {
+  // Simulate heavy computation
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  return x * x;
+}
+
+int main() {
+  // Launch computeSquare asynchronously. Using std::launch::async forces immediate execution
+  std::future<int> fut = std::async(std::launch::async, computeSquare, 5);
+  std::cout << "Square: " << fut.get() << std::endl;
+  return 0;
+}
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Different launch policies available in \texttt{std::async}}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include ...
+
+int computeCube(int x) { ... }
+
+int main() {
+  // Using deferred launch: execution is postponed until get() is called
+  std::future<int> futDeferred = std::async(std::launch::deferred, computeCube, 3);
+  std::cout << "Deferred result: " << futDeferred.get() << std::endl;
+  
+  // Using async launch: task is executed immediately in a new thread
+  std::future<int> futAsync = std::async(std::launch::async, computeCube, 3);
+  std::cout << "Async result: " << futAsync.get() << std::endl;
+  
+  // Using default launch policy: implementation defined behavior
+  std::future<int> futDefault = std::async(computeCube, 3);
+  std::cout << "Default launch result: " << futDefault.get() << std::endl;
+  
+  return 0;
+}
+  \end{lstlisting}
+  Policies:
+  \begin{itemize}
+    \item \texttt{std::launch::deferred}: Execution is delayed until \texttt{get()} is called
+    \item \texttt{std::launch::async}: Execution starts immediately in a separate thread
+    \item Default policy: The decision is left to the implementation
+  \end{itemize}
+\end{frame}
+
+\section{Synchronization primitives (mutexes, condition variables, \dots)}
+
+\begin{frame}{Synchronization primitives overview}
+  \begin{itemize}
+    \item C++ provides several mechanisms to coordinate concurrent operations:
+      \begin{itemize}
+        \item Mutual exclusion: \texttt{std::mutex}, \texttt{std::lock\_guard}, \texttt{std::unique\_lock}
+        \item Condition variables: \texttt{std::condition\_variable}
+        \item Atomic operations: \texttt{std::atomic}
+      \end{itemize}
+    \item Choose the appropriate primitive based on the required control and performance
+    \item Proper synchronization is key to ensuring thread safety and avoiding data races
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{std::mutex}}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include <mutex>
+#include <thread>
+#include <iostream>
+
+std::mutex mtx;
+int counter = 0;
+
+void increment() {
+  mtx.lock();
+  {
+    ++counter; // protected section
+  }
+  mtx.unlock();
+}
+
+int main() {
+  std::thread t1(increment);
+  std::thread t2(increment);
+
+  t1.join();
+  t2.join();
+
+  std::cout << "Final counter value: " << counter << std::endl;
+  return 0;
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item Manual locking with \texttt{mtx.lock()} and unlocking with \texttt{mtx.unlock()}
+    \item Be cautious with exceptions to avoid deadlocks
+  \end{itemize}
+  There is a way to ensure that mutex will be unlocked\dots
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{std::mutex} and \texttt{std::lock\_guard}}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include <mutex>
+
+std::mutex mtx;
+int counter = 0;
+
+void increment() {
+  std::lock_guard<std::mutex> lock(mtx);
+  ++counter;  // protected section
+}
+  \end{lstlisting}
+  \begin{itemize}
+    \item \texttt{std::mutex}: exclusive lock
+    \item \texttt{std::lock\_guard}: RAII wrapper—locks on construction, unlocks on destruction
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{std::unique\_lock} and \texttt{std::condition\_variable}}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include <mutex>
+#include <condition_variable>
+
+std::mutex mtx;
+std::condition_variable cv;
+bool ready = false;
+
+void worker() {
+  std::unique_lock<std::mutex> lock(mtx);
+  cv.wait(lock, []{ return ready; });
+  // proceed once ready == true
+}
+
+void notifier() {
+  {
+    std::lock_guard<std::mutex> lock(mtx);
+    ready = true;
+  }
+  cv.notify_one();
+}
+  \end{lstlisting}
+  \texttt{std::unique\_lock}: provides flexible locking mechanisms such as deferred locking, timed locking, and manual unlocking/relocking, unlike \texttt{lock\_guard} which locks immediately and strictly scopes the lock.
+  \texttt{std::condition\_variable}: allows one or more threads to wait until a particular condition is met. It’s typically used with \texttt{unique\_lock} to enable the thread to wait and then be notified.
+\end{frame}
+
+\begin{frame}{\texttt{std::atomic}}
+  Lock-free primitives for simple data types. Avoid mutex overhead for simple counters and flags
+  Supported operations list:
+  \begin{itemize}
+    \item \texttt{store}: assign a new value
+    \item \texttt{load}: retrieve the current value
+    \item \texttt{exchange}: replace the value and obtain the old value
+    \item \texttt{compare\_exchange\_weak}/\texttt{compare\_exchange\_strong}: atomically compare and set
+    \item \texttt{fetch\_add}: add to the value and return the previous value
+    \item \texttt{fetch\_sub}: subtract from the value and return the previous value
+    \item \texttt{fetch\_and}: perform bitwise AND and return the previous value
+    \item \texttt{fetch\_or}: perform bitwise OR and return the previous value
+    \item \texttt{fetch\_xor}: perform bitwise XOR and return the previous value
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Atomic operations usage example}
+  \lstset{style=CStyle}
+  \begin{lstlisting}
+#include <atomic>
+#include <thread>
+#include <iostream>
+
+std::atomic<int> counter(0);
+
+void increment() {
+  for (int i = 0; i < 100000; ++i) {
+    counter.fetch_add(1, std::memory_order_relaxed);
+  }
+}
+
+int main() {
+  std::thread t1(increment);
+  std::thread t2(increment);
+
+  t1.join();
+  t2.join();
+
+  std::cout << "Final counter value: " << counter.load() << std::endl;
+  return 0;
+}
+  \end{lstlisting}
+  \texttt{std::atomic} provides lock-free operations. Use \texttt{fetch\_add} method and load to operate on atomic variables safely
+\end{frame}
+
+\section{Best practices and recommendations}
+
+\begin{frame}{Best practices and recommendations}
+  \begin{itemize}
+    \item Always join or detach threads before destruction
+    \item Prefer RAII wrappers (\texttt{std::lock\_guard}, \texttt{std::unique\_lock})
+    \item Minimize shared state; prefer message passing or futures
+    \item Be cautious with detached threads, manage lifetimes carefully
+    \item Consider higher-level thread pools (e.g., \texttt{std::async})
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{When and where to use \texttt{std::thread} in real world scenarios}
+  \begin{itemize}
+    \item Fine-grained control over threading
+    \item Building custom schedulers or thread pools
+    \item Interfacing directly with OS thread APIs
+    \item Performance critical sections where you avoid scheduler overhead
+    \item When introducing 3rdparty library is an overkill
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \centering
+  \Huge{Thank You!}
+\end{frame}
+
+\begin{frame}{References}
+  \begin{itemize}
+    \item cppreference.com: \url{https://en.cppreference.com/w/cpp/thread}
+  \end{itemize}
+\end{frame}
+
+\end{document}
