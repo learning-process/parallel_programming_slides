@@ -4,4 +4,4 @@
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-Slides: [Link](https://learning-process.github.io/parallel_programming_slides/)
+[![Lecture Slides](https://img.shields.io/badge/Slides-View%20Online-brightgreen)](https://learning-process.github.io/parallel_programming_slides/)
