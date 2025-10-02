@@ -142,12 +142,15 @@
         \item Random distribution of task variations
         \item Deadlines for each task
         \item Work organization in a single repository for all groups
-        \item Self-review by students
         \item Full automation of quality and performance checks
-        \item Optional reporting (written + spoken)
         \item Points-based grading system
         \item Plagiarism check of submitted tasks
-        \item Main communication channel: Telegram
+        \item Main communication channel:
+            \begin{itemize}
+                \item Telegram channel—fast news, \ldots
+                \item GitHub Issues in practice's repo—bugs, common problems, slow CI, \ldots
+                \item Lessons—Q\&A session, \ldots
+            \end{itemize}
     \end{itemize}
 \end{frame}
 
@@ -192,26 +195,13 @@
                     }
                     child {
                         node [scale=0.7, align=center]{
-                            Report (max: 10 points)
+                            Reports (max: 10 points)
                         }
                         child {
                             node[scale=0.6, align=center] {
-                                Comment: An optional report \\
-                                for the final task, \\
-                                written using LaTeX.
-                            }
-                        }
-                    }
-                    child {
-                        node [scale=0.7, align=center]{
-                            Verbal communication \\
-                            (max: 5 points)
-                        }
-                        child {
-                            node[scale=0.6, align=center] {
-                                Comment: An optional verbal \\
-                                communication on the tasks \\
-                                with practice instructors.
+                                Comment: Reports \\
+                                for the all tasks, \\
+                                written using Markdown.
                             }
                         }
                     }
@@ -220,33 +210,36 @@
     \end{center}
 \end{frame}
 
-\begin{frame}{Tasks points distribution (max: 60 points)}
-    Easy tasks: 10
+\begin{frame}[shrink]{Points distribution (max: 70 points)}
+    Easy tasks: 12
     \begin{itemize}
         \item Solution implementation: 5
         \item Tests passed: 5
+        \item Report: 2
+        \begin{itemize}
+            \item The presence of the required items in the report format: 1
+            \item Text quality and formatting: 1
+        \end{itemize}
     \end{itemize}
-    Medium tasks: 20
+    Medium tasks: 23
     \begin{itemize}
         \item Solution implementation: 15
         \item Performance: 5
+        \item Report: 3
+        \begin{itemize}
+            \item The presence of the required items in the report format: 2
+            \item Text quality and formatting: 1
+        \end{itemize}
     \end{itemize}
-    Challenging tasks: 30
+    Challenging tasks: 35
     \begin{itemize}
         \item Solution implementation: 20
         \item Performance: 10
-    \end{itemize}
-\end{frame}
-
-\begin{frame}{Report and verbal communication (max: 15 points)}
-    Report: 10
-    \begin{itemize}
-        \item The presence of the required items in the report format: 5
-        \item Text quality and formatting: 5
-    \end{itemize}
-    Verbal communication: 5
-    \begin{itemize}
-        \item The completeness of the response: 5
+        \item Report: 5
+        \begin{itemize}
+            \item The presence of the required items in the report format: 3
+            \item Text quality and formatting: 2
+        \end{itemize}
     \end{itemize}
 \end{frame}
 
