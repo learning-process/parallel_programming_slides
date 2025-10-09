@@ -71,61 +71,6 @@
     \tableofcontents
 \end{frame}
 
-\section{Boost.MPI}
-
-\begin{frame}{Boost.MPI}
-  Boost.MPI is a part of the Boost C++ libraries that provides C++ bindings for the Message Passing Interface (MPI).
-
-  Boost.MPI makes it easier to write distributed applications in C++ by wrapping the complex MPI API with C++-friendly abstractions, improving safety and reducing the amount of boilerplate code.
-
-  Key Features of Boost.MPI:
-  \begin{itemize}
-    \item Simplified use of MPI with C++ bindings.
-    \item Supports complex data types through Boost.Serialization.
-    \item Easier management of distributed tasks and communication.
-    \item Compatible with common MPI implementations like MPICH, OpenMPI, MS MPI, etc.
-  \end{itemize}
-
-  Note: C API mappting ot Boost.MPI: \href{https://www.boost.org/doc/libs/1_86_0/doc/html/mpi/c_mapping.html}{link}
-
-  {\footnotesize For more details see Boost.MPI docs: \href{https://www.boost.org/doc/libs/1_86_0/doc/html/mpi.html}{link}}
-\end{frame}
-
-\begin{frame}[fragile]{Boost.MPI example}
-  \lstset{style=CStyle, caption=Hello World example with Boost MPI}
-  \begin{lstlisting}
-#include <boost/mpi.hpp>
-#include <iostream>
-
-// Namespace alias for convenience
-namespace mpi = boost::mpi;
-
-int main(int argc, char* argv[]) {
-  // Initialize the MPI environment
-  mpi::environment env(argc, argv);
-  mpi::communicator world;
-
-  // Get the rank (ID) of the current process and the total number of processes
-  int rank = world.rank();
-  int size = world.size();
-
-  if (rank == 0) {
-    // If this is the root process (rank 0), send a message to another process
-    std::string message = "Hello from process 0";
-    world.send(1, 0, message);  // Send to process 1
-    std::cout << "Process 0 sent: " << message << std::endl;
-  } else if (rank == 1) {
-    // If this is process 1, receive the message
-    std::string received_message;
-    world.recv(0, 0, received_message);  // Receive from process 0
-    std::cout << "Process 1 received: " << received_message << std::endl;
-  }
-
-  return 0;
-}
-  \end{lstlisting}
-\end{frame}
-
 \section{Advanced Send/Receive API}
 
 \begin{frame}{Why Using \texttt{MPI\_Send} and \texttt{MPI\_Recv} Is Not Enough?}
@@ -144,7 +89,6 @@ int main(int argc, char* argv[]) {
   {
     \footnotesize
     \texttt{int MPI\_Isend(const void *buf, int count, MPI\_Datatype datatype, int dest, int tag, MPI\_Comm comm, MPI\_Request *request);} \\
-    \texttt{boost::mpi::request boost::mpi::communicator::isend(int dest, int tag, const T* values, int n);}
   }
 
   Parameters:
@@ -167,7 +111,6 @@ int main(int argc, char* argv[]) {
   {
     \footnotesize
     \texttt{int MPI\_Irecv(void *buf, int count, MPI\_Datatype datatype, int source, int tag, MPI\_Comm comm, MPI\_Request *request);} \\
-    \texttt{boost::mpi::request boost::mpi::communicator::irecv(int source, int tag, T\& value);}
   }
 
   Parameters:
@@ -210,7 +153,6 @@ int main(int argc, char* argv[]) {
   {
     \footnotesize
     \texttt{int MPI\_Barrier(MPI\_Comm comm);} \\
-    \texttt{void boost::mpi::communicator::barrier();}
   }
 
   Usage:
@@ -252,7 +194,6 @@ int main(int argc, char* argv[]) {
   {
     \footnotesize
     \texttt{int MPI\_Bcast(void *buffer, int count, MPI\_Datatype datatype, int root, MPI\_Comm comm);} \\
-    \texttt{void broadcast(const communicator\& comm, T\& value, int root);} (needs \texttt{\#include <boost/mpi/collectives.hpp>})
   }
 
   \begin{minipage}[t]{0.6\textwidth}
@@ -282,7 +223,6 @@ int main(int argc, char* argv[]) {
   {
     \footnotesize
     \texttt{int MPI\_Reduce(const void *sendbuf, void *recvbuf, int count, MPI\_Datatype datatype, MPI\_Op op, int root, MPI\_Comm comm);} \\
-    \texttt{void reduce(const communicator\& comm, const T\& in\_value, T\& out\_value, Op op, int root);} (needs \texttt{\#include <boost/mpi/collectives.hpp>})
   }
 
   \begin{minipage}[t]{0.2\textwidth}
@@ -309,7 +249,6 @@ int main(int argc, char* argv[]) {
   {
     \footnotesize
     \texttt{int MPI\_Gather(const void *sendbuf, int sendcount, MPI\_Datatype sendtype, void *recvbuf, int recvcount, MPI\_Datatype recvtype, int root, MPI\_Comm comm);} \\
-    \texttt{void gather(const communicator\& comm, const T\& in\_value, std::vector<T>\& out\_values, int root);} (needs \texttt{\#include <boost/mpi/collectives.hpp>})
   }
 
   \begin{minipage}[t]{0.6\textwidth}
@@ -334,7 +273,6 @@ int main(int argc, char* argv[]) {
   {
     \footnotesize
     \texttt{int MPI\_Scatter(const void *sendbuf, int sendcount, MPI\_Datatype sendtype, void *recvbuf, int recvcount, MPI\_Datatype recvtype, int root, MPI\_Comm comm);} \\
-    \texttt{void scatter(const communicator\& comm, const std::vector<T>\& in\_values, T\& out\_value, int root);} (needs \texttt{\#include <boost/mpi/collectives.hpp>})
   }
 
   \begin{minipage}[t]{0.6\textwidth}
@@ -359,11 +297,25 @@ int main(int argc, char* argv[]) {
   {
     \footnotesize
     \texttt{int MPI\_Allgather(const void *sendbuf, int sendcount, MPI\_Datatype sendtype, void *recvbuf, int recvcount, MPI\_Datatype recvtype, MPI\_Comm comm);} \\
-    \texttt{void all\_gather(const communicator\& comm, const T\& in\_value, 
-    std::vector<T>\& out\_values);} (needs \texttt{\#include <boost/mpi/collectives.hpp>})
   }
 
-  Usage of this function reduces the need for separate gather and broadcast operations.
+  \begin{minipage}[t]{0.6\textwidth}
+    Parameters:
+    \begin{itemize}
+      \item sendbuf: Starting address of send buffer
+      \item sendcount / sendtype: Number and type of elements contributed by each process
+      \item recvbuf: Starting address of receive buffer
+      \item recvcount / recvtype: Number and type of elements received from each process
+    \end{itemize}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.35\textwidth}
+    \begin{figure}[h]
+      \includegraphics[scale=0.6]{images/allgather.png}
+    \end{figure}
+  \end{minipage}
+
+  {\footnotesize Source: \href{https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/}{https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/}}
 \end{frame}
 
 \begin{frame}{All-to-All (\texttt{MPI\_Alltoall})}
@@ -372,7 +324,6 @@ int main(int argc, char* argv[]) {
   {
     \footnotesize
     \texttt{int MPI\_Alltoall(const void *sendbuf, int sendcount, MPI\_Datatype sendtype, void *recvbuf, int recvcount, MPI\_Datatype recvtype, MPI\_Comm comm);} \\
-    \texttt{void all\_to\_all(const communicator\& comm, const std::vector<T>\& in\_values, std::vector<T>\& out\_values);} (needs \texttt{\#include <boost/mpi/collectives.hpp>})
   }
 
   Note: This operation is communication-intensive.
@@ -403,8 +354,8 @@ int main(int argc, char* argv[]) {
 \begin{frame}{References}
   \begin{enumerate}
     \item MPI Standard \href{https://www.mpi-forum.org/docs/}{https://www.mpi-forum.org/docs/}
-    \item Boost.MPI Chapter in Boost documentation \href{https://www.boost.org/doc/libs/1_86_0/doc/html/mpi.html}{https://www.boost.org/doc/libs/1\_86\_0/doc/html/mpi.html}
     \item Open MPI v4.0.7 documentation: \href{https://www.open-mpi.org/doc/v4.0/}{https://www.open-mpi.org/doc/v4.0/}
+    \item MPI Scatter, Gather, and Allgather: \href{https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/}{https://mpitutorial.com/tutorials/mpi-scatter-gather-and-allgather/}
   \end{enumerate}
 \end{frame}
 
