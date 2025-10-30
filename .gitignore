@@ -25,6 +25,7 @@
 *.run.xml
 *.bcf
 *.vrb
+*.toc
 
 # Editors and IDEs
 # VSCode
